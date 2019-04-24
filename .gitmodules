@@ -1,0 +1,3 @@
+[submodule "dist/production"]
+	path = dist/production
+	url = git@github.com:tana-gh/vision-clock-page.git
