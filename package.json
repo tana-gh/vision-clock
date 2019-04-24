@@ -22,7 +22,7 @@
   "dependencies": {
     "@babel/runtime": "^7.3.4",
     "ramda": "^0.26.1",
-    "rx": "^4.1.0",
+    "rxjs": "^6.5.1",
     "three": "^0.103.0"
   },
   "devDependencies": {

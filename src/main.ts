@@ -1,12 +1,4 @@
-import '@/stylus/style.styl'
-import * as Render  from '@/ts/render'
-import * as Factory from '@/ts/factory'
+import './stylus/style.styl'
+import * as VisionClock from './visionclock'
 
-window.onload = () => {
-    const width  = window.innerWidth  - 20
-    const height = window.innerHeight - 20
-
-    const objs = Factory.createAll()
-
-    Render.initRender(width, height, objs)
-}
+const threeState = VisionClock.load(document.getElementById('visionclock')!)
