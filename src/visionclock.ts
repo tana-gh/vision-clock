@@ -1,13 +1,15 @@
 import * as ThreeState from './threestate'
+import * as Animation  from './animation'
 
 export interface IVisionClock {
 
 }
 
 export const load = (parent: HTMLElement) => {
-    const threeState = ThreeState.create(400, 400)
+    const threeState = ThreeState.create(parent.clientWidth, parent.clientHeight)
     parent.appendChild(threeState.renderer.domElement)
-    ThreeState.resizeRenderer(threeState, 400, 400)
-    threeState.renderer.render(threeState.scene, threeState.camera)
+    window.addEventListener('resize', () => 
+        ThreeState.resizeRenderer(threeState, parent.clientWidth, parent.clientHeight))
+    window.requestAnimationFrame(Animation.animate(threeState, {}))
     return threeState
 }

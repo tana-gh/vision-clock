@@ -3,8 +3,8 @@ import * as Rx    from 'rxjs'
 import * as RxOp  from 'rxjs/operators'
 
 export interface IInteraction {
-    readonly position: THREE.Vector2 | undefined
-    readonly movement: THREE.Vector2 | undefined
+    readonly position: THREE.Vector3
+    readonly movement: THREE.Vector3
     readonly button1 : boolean
     readonly button2 : boolean
     readonly button3 : boolean
@@ -16,16 +16,7 @@ export const create = (targetElement: HTMLElement | Window, rootElement: HTMLEle
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mousemove', { capture: true }),
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mouseup'  , { capture: true })
     )
-    return Rx.pipe(
-        RxOp.map(update(targetElement)),
-        RxOp.merge(Rx.of(<IInteraction>{
-            position: undefined,
-            movement: undefined,
-            button1 : false,
-            button2 : false,
-            button3 : false
-        }))
-    )(mouseEvents)
+    return RxOp.map(update(targetElement))(mouseEvents)
 }
 
 const update = (targetElement: HTMLElement | Window) => (e: MouseEvent) => {
@@ -33,8 +24,8 @@ const update = (targetElement: HTMLElement | Window) => (e: MouseEvent) => {
     const [x, y] = [e.clientX - targetLeft, e.clientY - targetTop]
     const height = targetElement instanceof HTMLElement ? targetElement.clientHeight : targetElement.innerHeight
 
-    const position = new THREE.Vector2(x, height - y - 1)
-    const movement = new THREE.Vector2(e.movementX, e.movementY)
+    const position = new THREE.Vector3(x, 1.0 + y - height, 0.0).divideScalar(height)
+    const movement = new THREE.Vector3(e.movementX, -e.movementY, 0.0).divideScalar(height)
     
     return <IInteraction>{
         position,
