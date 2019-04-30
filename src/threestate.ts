@@ -2,19 +2,22 @@ import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Rx          from 'rxjs'
 import * as Interaction from './interaction'
+import * as ThreeObject from './threeobject'
+import * as ClockObject from './clockobject'
 
 export interface IThreeState {
     scene        : THREE.Scene
     camera       : THREE.Camera
     renderer     : THREE.Renderer
-    objects      : THREE.Object3D[]
+    objects      : ThreeObject.IThreeObject[]
     interactions : Rx.Observable<Interaction.IInteraction>
     subscriptions: Rx.Subscription[]
     width        : number
     height       : number
 }
 
-export const create = (width: number, height: number) => {
+export const create = (width: number, height: number): IThreeState => {
+    const renderer = new THREE.WebGLRenderer()
     const threeState = {
         scene : new THREE.Scene(),
         camera: new THREE.PerspectiveCamera
@@ -24,8 +27,9 @@ export const create = (width: number, height: number) => {
             0.1,
             100.0
         ),
-        renderer     : new THREE.WebGLRenderer(),
-        objects      : <THREE.Object3D[]>[],
+        renderer,
+        objects      : <ThreeObject.IThreeObject[]>[],
+        interactions : Interaction.create(renderer.domElement, window),
         subscriptions: <Rx.Subscription[]>[],
         width,
         height
@@ -51,39 +55,18 @@ export const create = (width: number, height: number) => {
         threeState.scene.add(light)
     }, lightParams)
 
-    const geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0)
-    const material = new THREE.MeshPhysicalMaterial({
-        color: 0xFFFFFF,
-        metalness: 0.5,
-        roughness: 0.5,
-        clearCoat: 0.5,
-        clearCoatRoughness: 0.5,
-        reflectivity: 1.0,
-        fog: true
-    })
-    const mesh = new THREE.Mesh(geometry, material)
-    threeState.scene.add(mesh)
-    threeState.objects.push(mesh)
+    const clock = ClockObject.create()
+    threeState.scene.add(clock.obj)
+    threeState.objects.push(clock)
 
     threeState.scene.fog = new THREE.Fog(0x000000)
 
-    const interactions = Interaction.create(threeState.renderer.domElement, window)
-    const sub = interactions.subscribe(i => {
-        if (!i.button1) {
-            return
-        }
-        const axis = i.movement
-                      .clone()
-                      .cross(new THREE.Vector3(0.0, 0.0, -1.0))
-                      .normalize()
-        R.forEach(obj => obj.rotateOnWorldAxis(axis, i.movement.length()), threeState.objects)
-    })
-    threeState.subscriptions.push(sub)
-
-    return {
-        ...threeState,
-        interactions
-    }
+    R.forEach((obj: ThreeObject.IThreeObject) => {
+        const sub = threeState.interactions.subscribe(i => obj.updateByInteraction(obj.obj, i))
+        threeState.subscriptions.push(sub)
+    })(threeState.objects)
+    
+    return threeState
 }
 
 export const resizeRenderer = (threeState: IThreeState, width: number, height: number) => {
@@ -92,7 +75,7 @@ export const resizeRenderer = (threeState: IThreeState, width: number, height: n
 }
 
 export const dispose = (threeState: IThreeState) => {
-    threeState.subscriptions.forEach(s => s.unsubscribe())
+    R.forEach((s: Rx.Subscription) => s.unsubscribe())(threeState.subscriptions)
 }
 
 const setStyle = (element: HTMLElement, width: number, height: number) => {
