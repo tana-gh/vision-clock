@@ -1,6 +1,6 @@
 import * as R           from 'ramda'
-import * as ThreeState  from './threestate'
-import * as ThreeObject from './threeobject'
+import * as ThreeState  from './three/threestate'
+import * as ThreeObject from './three/threeobject'
 import * as Renderer    from './renderer'
 
 export interface IAnimationState {

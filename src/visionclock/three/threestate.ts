@@ -1,11 +1,11 @@
 import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Rx          from 'rxjs'
-import * as Interaction from './interaction'
-import * as Time        from './time'
+import * as Interaction from '../interaction'
+import * as Time        from '../time'
 import * as ThreeObject from './threeobject'
 import * as ClockObject from './clockobject'
-import * as C           from './utils/constants'
+import * as C           from '../utils/constants'
 
 export interface IThreeState {
     scene        : THREE.Scene

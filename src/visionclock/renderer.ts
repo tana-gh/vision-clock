@@ -1,4 +1,4 @@
-import * as ThreeState from './threestate'
+import * as ThreeState from './three/threestate'
 
 export const render = (
     threeState: ThreeState.IThreeState

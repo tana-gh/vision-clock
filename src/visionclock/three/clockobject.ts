@@ -2,9 +2,9 @@ import * as THREE          from 'three'
 import * as R              from 'ramda'
 import * as ThreeObject    from './threeobject'
 import * as CustomGeometry from './customgeometry'
-import * as Animation      from './animation'
-import * as Interaction    from './interaction'
-import * as C              from './utils/constants'
+import * as Animation      from '../animation'
+import * as Interaction    from '../interaction'
+import * as C              from '../utils/constants'
 
 export const create = ({
     radius,

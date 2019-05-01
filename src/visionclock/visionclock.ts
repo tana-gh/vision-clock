@@ -1,4 +1,4 @@
-import * as ThreeState from './threestate'
+import * as ThreeState from './three/threestate'
 import * as Animation  from './animation'
 
 export interface IVisionClock {

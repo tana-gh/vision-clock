@@ -1,6 +1,6 @@
 import * as THREE       from 'three'
-import * as Animation   from './animation'
-import * as Interaction from './interaction'
+import * as Animation   from '../animation'
+import * as Interaction from '../interaction'
 
 export interface IThreeObject {
     elements: {
