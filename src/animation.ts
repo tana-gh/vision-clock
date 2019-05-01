@@ -24,7 +24,7 @@ export const animate = (
     animationState.progress = timestamp - animationState.before
     animationState.before   = timestamp
 
-    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj.obj, animationState))(threeState.objects)
+    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj, animationState))(threeState.objects)
     Renderer.render(threeState)
 
     window.requestAnimationFrame(animate(threeState, animationState))

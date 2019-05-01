@@ -20,15 +20,26 @@ export const create = ({
     secondHandHeight,
     scaleLength,
     scaleWidth,
-    scaleHeight
+    scaleHeight,
+    baseScaleGap
 } = C.clockParams): ThreeObject.IThreeObject => {
-    const material = createMaterial()
-    const scales   = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, material)
-
+    const material   = createMaterial()
+    const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material)
+    const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material)
+    const secondHand = createHand(secondHandLength, secondHandWidth, secondHandHeight, hourHandHeight + minuteHandHeight + secondHandHeight, secondHandBack, material)
+    const scales     = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, baseScaleGap, material)
+    const clock      = new THREE.Object3D().add(hourHand, minuteHand, secondHand, scales)
     return {
-        obj: new THREE.Object3D().add(scales),
+        elements: {
+            clock,
+            hourHand,
+            minuteHand,
+            secondHand,
+            scales
+        },
         updateByAnimation,
-        updateByInteraction
+        updateByInteraction,
+        updateByTime
     }
 }
 
@@ -36,9 +47,31 @@ const createMaterial = () => {
     return new THREE.MeshPhysicalMaterial(C.clockMaterial)
 }
 
-const createAllScales = (radius: number, length: number, width: number, height: number, material: THREE.Material) => {
-    const vertices = R.map(C.mapVertices(length, 0.0, width, height))(C.clockScaleVertices)
-    const scales   = R.map(createOneScale(radius, vertices, material))(R.range(0, 12))
+const createHand = (
+    length  : number,
+    width   : number,
+    height  : number,
+    z       : number,
+    back    : number,
+    material: THREE.Material
+) => {
+    const vertices = R.map(C.mapVertices(length, width, height, z, back))(C.clockHandVertices)
+    const geometry = CustomGeometry.create(vertices, C.clockHandIndices)
+    return new THREE.Mesh(geometry, material)
+}
+
+const createAllScales = (
+    radius  : number,
+    length  : number,
+    width   : number,
+    height  : number,
+    gap     : number,
+    material: THREE.Material
+) => {
+    const vertices = R.map(C.mapVertices(length, width, height, 0.0, 0.0))(C.clockScaleVertices)
+    const scales   = R.map(createOneScale(radius, vertices, material))(R.range(0, 13))
+    scales[ 0].translateX( gap)
+    scales[12].translateX(-gap)
     return new THREE.Object3D().add(...scales)
 }
 
@@ -48,25 +81,26 @@ const createOneScale = (radius: number, vertices: number[], material: THREE.Mate
     return new THREE.Object3D().add(mesh).rotateZ(-index * 2 * Math.PI / 12)
 }
 
-const updateByAnimation = (
-    obj      : THREE.Object3D,
-    animation: Animation.IAnimationState
-) => {
-    return obj
+const updateByAnimation = (obj: ThreeObject.IThreeObject, animation: Animation.IAnimationState) => {
 }
 
-const updateByInteraction = (
-    obj        : THREE.Object3D,
-    interaction: Interaction.IInteraction
-) => {
-    if (!interaction.button1) {
-        return obj
-    }
-
-    const axis = interaction.movement
-                    .clone()
-                    .cross(new THREE.Vector3(0.0, 0.0, -1.0))
-                    .normalize()
+const updateByInteraction = (obj: ThreeObject.IThreeObject, interaction: Interaction.IInteraction) => {
+    const axis = interaction.position
+                 .clone()
+                 .cross(new THREE.Vector3(0.0, 0.0, -1.0))
+                 .normalize()
     
-    return obj.rotateOnWorldAxis(axis, interaction.movement.length())
+    obj.elements.clock.setRotationFromAxisAngle(axis, interaction.position.length() * C.clockRotationAngle)
+}
+
+const updateByTime = (obj: ThreeObject.IThreeObject, time: Date) => {
+    const [h, m, s] = [time.getHours(), time.getMinutes(), time.getSeconds()]
+
+    updateHandByTime(obj.elements.hourHand  , (h % 12 * 60 * 60 + m * 60 + s) / (12 * 60 * 60))
+    updateHandByTime(obj.elements.minuteHand, (m * 60 + s) / (60 * 60))
+    updateHandByTime(obj.elements.secondHand, s / 60)
+}
+
+const updateHandByTime = (hand: THREE.Object3D, ratio: number) => {
+    hand.setRotationFromAxisAngle(new THREE.Vector3(0.0, 0.0, -1.0), 2.0 * Math.PI * ratio)
 }

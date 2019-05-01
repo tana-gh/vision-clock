@@ -2,8 +2,10 @@ import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Rx          from 'rxjs'
 import * as Interaction from './interaction'
+import * as Time        from './time'
 import * as ThreeObject from './threeobject'
 import * as ClockObject from './clockobject'
+import * as C           from './utils/constants'
 
 export interface IThreeState {
     scene        : THREE.Scene
@@ -11,6 +13,7 @@ export interface IThreeState {
     renderer     : THREE.Renderer
     objects      : ThreeObject.IThreeObject[]
     interactions : Rx.Observable<Interaction.IInteraction>
+    times        : Rx.Observable<Date>
     subscriptions: Rx.Subscription[]
     width        : number
     height       : number
@@ -30,6 +33,7 @@ export const create = (width: number, height: number): IThreeState => {
         renderer,
         objects      : <ThreeObject.IThreeObject[]>[],
         interactions : Interaction.create(renderer.domElement, window),
+        times        : Time.create(),
         subscriptions: <Rx.Subscription[]>[],
         width,
         height
@@ -41,28 +45,25 @@ export const create = (width: number, height: number): IThreeState => {
     threeState.renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 0.0)
     threeState.renderer.setSize(width, height)
     
-    const lightParams = [
-        { color: 0xFFFFFF, x:  1.0, y:  1.0, z: 1.0 },
-        { color: 0xFFCC88, x:  1.5, y:  1.5, z: 3.0 },
-        { color: 0xFF44CC, x: -4.0, y: -4.0, z: 0.0 },
-        { color: 0x44FF88, x:  0.0, y: -3.0, z: 1.0 },
-        { color: 0x44CCFF, x:  0.0, y:  2.0, z: 0.0 }
-    ]
-    
     R.forEach(param => {
         const light = new THREE.PointLight(new THREE.Color(param.color))
         light.position.set(param.x, param.y, param.z)
         threeState.scene.add(light)
-    }, lightParams)
+    }, C.lightParams)
 
     const clock = ClockObject.create()
-    threeState.scene.add(clock.obj)
+    threeState.scene.add(clock.elements.clock)
     threeState.objects.push(clock)
 
-    threeState.scene.fog = new THREE.Fog(0x000000)
+    threeState.scene.fog = new THREE.Fog(C.fogColor)
 
     R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = threeState.interactions.subscribe(i => obj.updateByInteraction(obj.obj, i))
+        const sub = threeState.interactions.subscribe(i => obj.updateByInteraction(obj, i))
+        threeState.subscriptions.push(sub)
+    })(threeState.objects)
+
+    R.forEach((obj: ThreeObject.IThreeObject) => {
+        const sub = threeState.times.subscribe(d => obj.updateByTime(obj, d))
         threeState.subscriptions.push(sub)
     })(threeState.objects)
     

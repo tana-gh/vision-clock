@@ -1,21 +1,26 @@
 
 export const visionClockClass = 'visionclock'
 
+export const timerPeriod = 10
+
+export const fogColor = 0x000000
+
 export const clockParams = {
     radius          : 0.8,
-    hourHandLength  : 0.25,
-    hourHandWidth   : 0.025,
-    hourHandHeight  : 0.005,
-    minuteHandLength: 0.35,
-    minuteHandWidth : 0.01,
-    minuteHandHeight: 0.005,
-    secondHandLength: 0.35,
-    secondHandBack  : 0.05,
-    secondHandWidth : 0.002,
-    secondHandHeight: 0.002,
+    hourHandLength  : 0.5,
+    hourHandWidth   : 0.03,
+    hourHandHeight  : 0.02,
+    minuteHandLength: 0.75,
+    minuteHandWidth : 0.02,
+    minuteHandHeight: 0.01,
+    secondHandLength: 0.9,
+    secondHandWidth : 0.01,
+    secondHandHeight: 0.01,
+    secondHandBack  : 0.15,
     scaleLength     : 0.1,
-    scaleWidth      : 0.01,
-    scaleHeight     : 0.01
+    scaleWidth      : 0.005,
+    scaleHeight     : 0.005,
+    baseScaleGap    : 0.02
 }
 
 export const clockMaterial = {
@@ -28,11 +33,24 @@ export const clockMaterial = {
     fog: true
 }
 
+export const clockHandVertices = [
+     '0', '-b', 'h',  '0',  'l'  ,  'z',
+    '-w', '-b', 'z',  '0', '-w-b',  'z',
+     'w', '-b', 'z',  '0', '-b'  , '-h'
+]
+
+export const clockHandIndices = [
+    0, 1, 2,  0, 2, 3,
+    0, 3, 4,  0, 4, 1,
+    5, 2, 1,  5, 3, 2,
+    5, 4, 3,  5, 1, 4
+]
+
 export const clockScaleVertices = [
-     'z', 'z',  'h',   'z', '-l',  'h',
-     'w', 'z',  'z',   'w', '-l',  'z',
-     'z', 'z', '-h',   'z', '-l', '-h',
-    '-w', 'z',  'z',  '-w', '-l',  'z'
+     '0', '0',  'h',   '0', '-l',  'h',
+     'w', '0',  'z',   'w', '-l',  'z',
+     '0', '0', '-h',   '0', '-l', '-h',
+    '-w', '0',  'z',  '-w', '-l',  'z'
 ]
 
 export const clockScaleIndices = [
@@ -46,30 +64,43 @@ export const clockScaleIndices = [
 
 export const mapVertices = (
     length: number,
-    back  : number,
     width : number,
-    height: number
+    height: number,
+    z     : number,
+    back  : number
 ) => (placeholder: string) => {
     switch (placeholder) {
-        case 'z':
+        case '0':
             return 0.0
         case 'l':
-            return length
+            return length - back
         case '-l':
-            return -length
-        case 'b':
-            return back
-        case '-b':
-            return -back
+            return -length - back
         case 'w':
             return width
         case '-w':
             return -width
+        case '-w-b':
+            return -width - back
         case 'h':
-            return height
+            return z + height
         case '-h':
-            return -height
+            return z - height
+        case 'z':
+            return z
+        case '-b':
+            return -back
         default:
             return 0.0
     }
 }
+
+export const clockRotationAngle = 2.0 * Math.PI / 36.0
+
+export const lightParams = [
+    { color: 0xFFFFFF, x:  1.0, y:  1.0, z: 1.0 },
+    { color: 0xFFCC88, x:  1.5, y:  1.5, z: 3.0 },
+    { color: 0x884444, x: -4.0, y: -4.0, z: 0.0 },
+    { color: 0x888844, x:  0.0, y: -3.0, z: 1.0 },
+    { color: 0xCCCCCC, x:  0.0, y:  2.0, z: 0.0 }
+]
