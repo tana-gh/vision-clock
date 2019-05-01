@@ -2,68 +2,68 @@ import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Rx          from 'rxjs'
 import * as Interaction from '../interaction'
-import * as Time        from '../time'
 import * as ThreeObject from './threeobject'
 import * as ClockObject from './clockobject'
+import * as Lights      from './lights'
 import * as C           from '../utils/constants'
 
 export interface IThreeState {
     scene        : THREE.Scene
-    camera       : THREE.Camera
-    renderer     : THREE.Renderer
+    camera       : THREE.PerspectiveCamera
+    renderer     : THREE.WebGLRenderer
+    render       : (threeState: IThreeState) => void
     objects      : ThreeObject.IThreeObject[]
-    interactions : Rx.Observable<Interaction.IInteraction>
-    times        : Rx.Observable<Date>
     subscriptions: Rx.Subscription[]
-    width        : number
-    height       : number
 }
 
-export const create = (width: number, height: number): IThreeState => {
+export const create = (
+    width       : number,
+    height      : number,
+    interactions: Rx.Observable<Interaction.IInteraction>,
+    times       : Rx.Observable<Date>
+): IThreeState => {
+    const scene  = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera
+    (
+        30.0,
+        width / height,
+        0.1,
+        100.0
+    )
     const renderer = new THREE.WebGLRenderer()
-    const threeState = {
-        scene : new THREE.Scene(),
-        camera: new THREE.PerspectiveCamera
-        (
-            30.0,
-            width / height,
-            0.1,
-            100.0
-        ),
+
+    const threeState: IThreeState = {
+        scene,
+        camera,
         renderer,
-        objects      : <ThreeObject.IThreeObject[]>[],
-        interactions : Interaction.create(renderer.domElement, window),
-        times        : Time.create(),
-        subscriptions: <Rx.Subscription[]>[],
-        width,
-        height
+        render       : threeState => threeState.renderer.render(threeState.scene, threeState.camera),
+        objects      : [],
+        subscriptions: [],
     }
 
-    threeState.camera.position.set(0.0, 0.0, 5.0)
-    threeState.camera.lookAt(0.0, 0.0, 0.0)
+    camera.position.set(0.0, 0.0, 5.0)
+    camera.lookAt(0.0, 0.0, 0.0)
 
-    threeState.renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 0.0)
-    threeState.renderer.setSize(width, height)
-    
-    R.forEach(param => {
-        const light = new THREE.PointLight(new THREE.Color(param.color))
-        light.position.set(param.x, param.y, param.z)
-        threeState.scene.add(light)
-    }, C.lightParams)
+    renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 0.0)
+    renderer.setSize(width, height)
 
     const clock = ClockObject.create()
-    threeState.scene.add(clock.elements.clock)
+    scene.add(clock.elements.clock)
     threeState.objects.push(clock)
 
-    threeState.scene.fog = new THREE.Fog(C.fogColor)
+    const lights = Lights.create()
+    scene.add(lights.elements.lights)
+    threeState.objects.push(lights)
+
+    scene.fog = new THREE.Fog(C.fogColor)
 
     R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = threeState.interactions.subscribe(i => obj.updateByInteraction(obj, i))
+        const sub = interactions.subscribe(i => obj.updateByInteraction(obj, i))
         threeState.subscriptions.push(sub)
     })(threeState.objects)
 
     R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = threeState.times.subscribe(d => obj.updateByTime(obj, d))
+        const sub = times.subscribe(d => obj.updateByTime(obj, d))
         threeState.subscriptions.push(sub)
     })(threeState.objects)
     
