@@ -1,6 +1,7 @@
 import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Rx          from 'rxjs'
+import * as Animation   from '../animation'
 import * as Interaction from '../interaction'
 import * as ThreeObject from './threeobject'
 import * as ClockObject from './clockobject'
@@ -8,10 +9,17 @@ import * as Lights      from './lights'
 import * as C           from '../utils/constants'
 
 export interface IThreeState {
-    scene        : THREE.Scene
-    camera       : THREE.PerspectiveCamera
-    renderer     : THREE.WebGLRenderer
-    render       : (threeState: IThreeState) => void
+    scene       : THREE.Scene
+    camera      : THREE.PerspectiveCamera
+    pixiScene   : THREE.Scene
+    pixiCamera  : THREE.OrthographicCamera
+    pixiMaterial: THREE.SpriteMaterial
+    renderer    : THREE.WebGLRenderer
+    render      : (
+        threeState    : IThreeState,
+        animationState: Animation.IAnimationState,
+        pixiTexture   : Uint8Array | Uint8ClampedArray
+    ) => void
     objects      : ThreeObject.IThreeObject[]
     subscriptions: Rx.Subscription[]
 }
@@ -30,13 +38,26 @@ export const create = (
         0.1,
         100.0
     )
-    const renderer = new THREE.WebGLRenderer()
+    const pixiScene    = new THREE.Scene
+    const pixiCamera   = new THREE.OrthographicCamera(
+        -0.5,
+         0.5,
+         0.5,
+        -0.5,
+         0.5,
+        -0.5
+    )
+    const pixiMaterial = new THREE.SpriteMaterial()
+    const renderer     = new THREE.WebGLRenderer()
 
     const threeState: IThreeState = {
         scene,
         camera,
+        pixiScene,
+        pixiCamera,
+        pixiMaterial,
         renderer,
-        render       : threeState => threeState.renderer.render(threeState.scene, threeState.camera),
+        render       : render(width, height),
         objects      : [],
         subscriptions: [],
     }
@@ -46,6 +67,11 @@ export const create = (
 
     renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 0.0)
     renderer.setSize(width, height)
+    renderer.autoClear = false
+
+    pixiMaterial.needsUpdate = true
+    const pixiSprite = new THREE.Sprite(pixiMaterial)
+    pixiScene.add(pixiSprite)
 
     const clock = ClockObject.create()
     scene.add(clock.elements.clock)
@@ -73,6 +99,7 @@ export const create = (
 export const resizeRenderer = (threeState: IThreeState, width: number, height: number) => {
     setStyle(threeState.renderer.domElement, width, height)
     setRendererSize(threeState)
+    threeState.render = render(width, height)
 }
 
 export const dispose = (threeState: IThreeState) => {
@@ -80,7 +107,7 @@ export const dispose = (threeState: IThreeState) => {
 }
 
 const setStyle = (element: HTMLElement, width: number, height: number) => {
-    element.style.width  = `${width}px`
+    element.style.width  = `${width }px`
     element.style.height = `${height}px`
 }
 
@@ -110,4 +137,16 @@ const setCameraSize = (threeState: IThreeState, width: number, height: number) =
         camera.aspect = width / height
         camera.updateProjectionMatrix()
     }
+}
+
+const render = (width: number, height: number) =>
+(threeState: IThreeState, animationState: Animation.IAnimationState, rawPixiTexture: Uint8Array | Uint8ClampedArray) => {
+    const pixiTexture = new THREE.DataTexture(rawPixiTexture, width, height, THREE.RGBAFormat)
+    pixiTexture.needsUpdate = true
+    threeState.pixiMaterial.map = pixiTexture
+
+    threeState.renderer.clear()
+    threeState.renderer.render(threeState.pixiScene, threeState.pixiCamera)
+    threeState.renderer.clearDepth()
+    threeState.renderer.render(threeState.scene    , threeState.camera)
 }

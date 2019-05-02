@@ -1,6 +1,6 @@
 import * as R           from 'ramda'
-import * as ThreeState  from './three/threestate'
 import * as PixiState   from './pixi/pixistate'
+import * as ThreeState  from './three/threestate'
 import * as ThreeObject from './three/threeobject'
 
 export interface IAnimationState {
@@ -11,8 +11,8 @@ export interface IAnimationState {
 }
 
 export const animate = (
-    threeState    : ThreeState.IThreeState,
     pixiState     : PixiState .IPixiState,
+    threeState    : ThreeState.IThreeState,
     animationState: IAnimationState
 ) => (timestamp: number) => {
     if (!animationState.start) {
@@ -25,23 +25,24 @@ export const animate = (
     animationState.progress = timestamp - animationState.before
     animationState.before   = timestamp
 
-    animateThree(threeState, animationState)
-    animatePixi (pixiState , animationState)
+    const rawPixiTexture = animatePixi (pixiState , animationState)
+    animateThree(threeState, animationState, rawPixiTexture)
 
-    window.requestAnimationFrame(animate(threeState, pixiState, animationState))
-}
-
-const animateThree = (
-    threeState    : ThreeState.IThreeState,
-    animationState: IAnimationState
-) => {
-    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj, animationState))(threeState.objects)
-    threeState.render(threeState)
+    window.requestAnimationFrame(animate(pixiState, threeState, animationState))
 }
 
 const animatePixi = (
     pixiState     : PixiState.IPixiState,
     animationState: IAnimationState
 ) => {
-    pixiState.application.ticker.update(animationState.total)
+    return pixiState.render(pixiState, animationState)
+}
+
+const animateThree = (
+    threeState    : ThreeState.IThreeState,
+    animationState: IAnimationState,
+    rawPixiTexture: Uint8Array | Uint8ClampedArray
+) => {
+    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj, animationState))(threeState.objects)
+    threeState.render(threeState, animationState, rawPixiTexture)
 }

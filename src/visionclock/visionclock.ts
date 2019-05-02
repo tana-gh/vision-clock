@@ -12,14 +12,13 @@ export interface IVisionClockState {
 export const load = (parent: HTMLElement): IVisionClockState => {
     const interactions = Interaction.create(parent, window)
     const times        = Time.create()
-    const threeState   = ThreeState.create(parent.clientWidth, parent.clientHeight, interactions, times)
     const pixiState    = PixiState .create(parent.clientWidth, parent.clientHeight, interactions, times)
-    //parent.appendChild(threeState.renderer.domElement)
-    parent.appendChild(pixiState.application.view)
-    // window.addEventListener('resize', () => 
-    //     ThreeState.resizeRenderer(threeState, parent.clientWidth, parent.clientHeight))
-    window.addEventListener('resize', () => 
-        PixiState.resizeRenderer(pixiState, parent.clientWidth, parent.clientHeight))
-    window.requestAnimationFrame(Animation.animate(threeState, pixiState, {}))
+    const threeState   = ThreeState.create(parent.clientWidth, parent.clientHeight, interactions, times)
+    parent.appendChild(threeState.renderer.domElement)
+    window.addEventListener('resize', () => {
+        PixiState .resizeRenderer(pixiState , parent.clientWidth, parent.clientHeight)
+        ThreeState.resizeRenderer(threeState, parent.clientWidth, parent.clientHeight)
+    })
+    window.requestAnimationFrame(Animation.animate(pixiState, threeState, {}))
     return { threeState, pixiState }
 }
