@@ -1,0 +1,30 @@
+import * as R           from 'ramda'
+import * as PixiState   from './pixi/pixistate'
+import * as ThreeState  from './three/threestate'
+import * as ThreeObject from './three/threeobject'
+import * as Animation   from './animation'
+
+export const render = (
+    pixiState     : PixiState .IPixiState,
+    threeState    : ThreeState.IThreeState,
+    animationState: Animation.IAnimationState
+) => {
+    const rawPixiTexture = renderPixi(pixiState , animationState)
+    renderThree(threeState, animationState, rawPixiTexture)
+}
+
+const renderPixi = (
+    pixiState     : PixiState.IPixiState,
+    animationState: Animation.IAnimationState
+) => {
+    return pixiState.render(pixiState, animationState)
+}
+
+const renderThree = (
+    threeState    : ThreeState.IThreeState,
+    animationState: Animation.IAnimationState,
+    rawPixiTexture: Uint8Array | Uint8ClampedArray
+) => {
+    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj, animationState))(threeState.objects)
+    threeState.render(threeState, animationState, rawPixiTexture)
+}

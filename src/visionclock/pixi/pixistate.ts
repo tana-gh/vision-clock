@@ -1,5 +1,6 @@
 import * as PIXI        from 'pixi.js'
 import * as Rx          from 'rxjs'
+import * as R           from 'ramda'
 import * as Animation   from '../animation'
 import * as Interaction from '../interaction'
 
@@ -12,6 +13,7 @@ export interface IPixiState {
 export const create = (
     width       : number,
     height      : number,
+    animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction>,
     times       : Rx.Observable<Date>
 ): IPixiState => {
@@ -20,8 +22,7 @@ export const create = (
         height,
         autoStart : false,
         antialias : true,
-        preserveDrawingBuffer: true,
-        backgroundColor: 0xFFFFFF
+        preserveDrawingBuffer: true
     })
     
     const pixiState: IPixiState = {
@@ -33,7 +34,7 @@ export const create = (
     application.stage.pivot = new PIXI.Point(-width * 0.5, -height * 0.5)
 
     const graphics = new PIXI.Graphics()
-    graphics.beginFill(0xFF4444)
+    graphics.beginFill(0x665544)
     graphics.drawCircle(0.0, 0.0, height * 0.4)
     graphics.endFill()
     application.stage.addChild(graphics)
@@ -46,6 +47,10 @@ export const create = (
 export const resizeRenderer = (pixiState: IPixiState, width: number, height: number) => {
     pixiState.application.renderer.resize(width, height)
     pixiState.application.stage.pivot = new PIXI.Point(-width * 0.5, -height * 0.5)
+}
+
+export const dispose = (pixiState: IPixiState) => {
+    R.forEach((s: Rx.Subscription) => s.unsubscribe())(pixiState.subscriptions)
 }
 
 const render = (pixiState: IPixiState, animationState: Animation.IAnimationState) => {

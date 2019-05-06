@@ -27,6 +27,7 @@ export interface IThreeState {
 export const create = (
     width       : number,
     height      : number,
+    animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction>,
     times       : Rx.Observable<Date>
 ): IThreeState => {

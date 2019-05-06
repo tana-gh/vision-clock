@@ -1,6 +1,7 @@
-import * as THREE from 'three'
-import * as Rx    from 'rxjs'
-import * as RxOp  from 'rxjs/operators'
+import * as THREE     from 'three'
+import * as Rx        from 'rxjs'
+import * as RxOp      from 'rxjs/operators'
+import * as Animation from './animation'
 
 export interface IInteraction {
     readonly position: THREE.Vector3
@@ -10,7 +11,11 @@ export interface IInteraction {
     readonly button3 : boolean
 }
 
-export const create = (targetElement: HTMLElement | Window, rootElement: HTMLElement | Window) => {
+export const create = (
+    animations   : Rx.Observable<Animation.IAnimationState>,
+    targetElement: HTMLElement | Window,
+    rootElement  : HTMLElement | Window
+) => {
     const mouseEvents = Rx.merge(
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mousedown', { capture: true }),
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mousemove', { capture: true }),
@@ -31,7 +36,12 @@ export const create = (targetElement: HTMLElement | Window, rootElement: HTMLEle
         RxOp.filter(i => i !== undefined),
     )(touchEvents)
 
-    return Rx.merge(mouseInteractions, touchInteractions)
+    const interactions = Rx.merge(mouseInteractions, touchInteractions)
+
+    return <Rx.Observable<IInteraction>>Rx.pipe(
+        RxOp.bufferToggle(animations, _ => animations),
+        RxOp.flatMap(buf => Rx.from(buf))
+    )(interactions)
 }
 
 const getInteractionFromMouseEvent = (targetElement: HTMLElement | Window) => (e: MouseEvent) => {
