@@ -95,7 +95,7 @@ export const mapVertices = (
     }
 }
 
-export const clockRotationAngle = 2.0 * Math.PI / 36.0
+export const clockRotationAngle = 2.0 * Math.PI / 24.0
 
 export const lightParams = [
     { color: 0xFFFFFF, x:  1.0, y:  1.0, z: 1.0 },

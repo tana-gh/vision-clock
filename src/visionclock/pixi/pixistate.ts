@@ -14,7 +14,7 @@ export const create = (
     width       : number,
     height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
-    interactions: Rx.Observable<Interaction.IInteraction>,
+    interactions: Rx.Observable<Interaction.IInteraction[]>,
     times       : Rx.Observable<Date>
 ): IPixiState => {
     const application = new PIXI.Application({

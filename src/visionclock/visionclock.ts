@@ -13,7 +13,7 @@ export interface IVisionClockState {
 }
 
 export const load = (parent: HTMLElement): IVisionClockState => {
-    const animations   = Animation.create()
+    const animations   = Animation.create(Date.now())
     const interactions = Interaction.create(animations, parent, window)
     const times        = Time.create(animations)
     

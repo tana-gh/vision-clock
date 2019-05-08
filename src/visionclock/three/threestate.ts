@@ -28,7 +28,7 @@ export const create = (
     width       : number,
     height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
-    interactions: Rx.Observable<Interaction.IInteraction>,
+    interactions: Rx.Observable<Interaction.IInteraction[]>,
     times       : Rx.Observable<Date>
 ): IThreeState => {
     const scene  = new THREE.Scene()
@@ -85,7 +85,8 @@ export const create = (
     scene.fog = new THREE.Fog(C.fogColor)
 
     R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = interactions.subscribe(i => obj.updateByInteraction(obj, i))
+        const sub = interactions.subscribe(ii =>
+            R.forEach<Interaction.IInteraction>(i => obj.updateByInteraction(obj, i))(ii))
         threeState.subscriptions.push(sub)
     })(threeState.objects)
 

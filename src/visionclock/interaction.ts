@@ -38,9 +38,8 @@ export const create = (
 
     const interactions = Rx.merge(mouseInteractions, touchInteractions)
 
-    return <Rx.Observable<IInteraction>>Rx.pipe(
-        RxOp.bufferToggle(animations, _ => animations),
-        RxOp.flatMap(buf => Rx.from(buf))
+    return <Rx.Observable<IInteraction[]>>Rx.pipe(
+        RxOp.bufferToggle(animations, _ => animations)
     )(interactions)
 }
 

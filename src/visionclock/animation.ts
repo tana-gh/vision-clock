@@ -9,14 +9,14 @@ export interface IAnimationState {
     progress: number
 }
 
-export const create = () => {
+export const create = (now: number) => {
     const animations = Rx.merge(
         Rx.of(0),
         RxOp.repeat()(
             Rx.of(0, Rx.animationFrameScheduler)
         )
     )
-    const start = Date.now()
+    const start = now
 
     return Rx.pipe(
         RxOp.map(_ => Date.now()),
