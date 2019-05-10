@@ -20,7 +20,11 @@ export const clockParams = {
     scaleLength     : 0.1,
     scaleWidth      : 0.005,
     scaleHeight     : 0.005,
-    baseScaleGap    : 0.02
+    baseScaleGap    : 0.02,
+    frameRadius     : 1.0,
+    frameZ          : -0.2,
+    frameSegments   : 60,
+    frameOpacity    : 0.5
 }
 
 export const clockMaterial = {

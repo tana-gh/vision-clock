@@ -31,13 +31,8 @@ export const create = (
         subscriptions: []
     }
 
-    application.stage.pivot = new PIXI.Point(-width * 0.5, -height * 0.5)
-
-    const graphics = new PIXI.Graphics()
-    graphics.beginFill(0x665544)
-    graphics.drawCircle(0.0, 0.0, height * 0.4)
-    graphics.endFill()
-    application.stage.addChild(graphics)
+    application.stage.scale.set(1.0, -1.0)
+    application.stage.pivot = new PIXI.Point(-width * 0.5, height * 0.5)
 
     application.ticker.add(tick(pixiState))
 
@@ -46,7 +41,7 @@ export const create = (
 
 export const resizeRenderer = (pixiState: IPixiState, width: number, height: number) => {
     pixiState.application.renderer.resize(width, height)
-    pixiState.application.stage.pivot = new PIXI.Point(-width * 0.5, -height * 0.5)
+    pixiState.application.stage.pivot = new PIXI.Point(-width * 0.5, height * 0.5)
 }
 
 export const dispose = (pixiState: IPixiState) => {

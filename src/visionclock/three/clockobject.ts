@@ -21,14 +21,19 @@ export const create = ({
     scaleLength,
     scaleWidth,
     scaleHeight,
-    baseScaleGap
+    baseScaleGap,
+    frameRadius,
+    frameZ,
+    frameSegments,
+    frameOpacity
 } = C.clockParams): ThreeObject.IThreeObject => {
     const material   = createMaterial()
     const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material)
     const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material)
     const secondHand = createHand(secondHandLength, secondHandWidth, secondHandHeight, hourHandHeight + minuteHandHeight + secondHandHeight, secondHandBack, material)
     const scales     = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, baseScaleGap, material)
-    const clock      = new THREE.Object3D().add(hourHand, minuteHand, secondHand, scales)
+    const frame      = createFrame(frameRadius, frameZ, frameSegments, frameOpacity, material)
+    const clock      = new THREE.Object3D().add(hourHand, minuteHand, secondHand, scales, frame)
     return {
         elements: {
             clock,
@@ -75,10 +80,28 @@ const createAllScales = (
     return new THREE.Object3D().add(...scales)
 }
 
-const createOneScale = (radius: number, vertices: number[], material: THREE.Material) => (index: number) => {
+const createOneScale = (
+    radius  : number,
+    vertices: number[],
+    material: THREE.Material
+) => (index: number) => {
     const geometry = CustomGeometry.create(vertices, C.clockScaleIndices)
     const mesh     = new THREE.Mesh(geometry, material).translateY(radius)
     return new THREE.Object3D().add(mesh).rotateZ(-index * 2 * Math.PI / 12)
+}
+
+const createFrame = (
+    frameRadius  : number,
+    frameZ       : number,
+    frameSegments: number,
+    frameOpacity : number,
+    material: THREE.Material
+) => {
+    const geometry    = new THREE.CircleGeometry(frameRadius, frameSegments).translate(0.0, 0.0, frameZ)
+    const newMaterial = <THREE.MeshPhysicalMaterial>material.clone()
+    newMaterial.transparent = true
+    newMaterial.opacity     = frameOpacity
+    return new THREE.Mesh(geometry, newMaterial)
 }
 
 const updateByAnimation = (obj: ThreeObject.IThreeObject, animation: Animation.IAnimationState) => {
