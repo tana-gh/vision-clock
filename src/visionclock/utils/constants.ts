@@ -24,7 +24,7 @@ export const clockParams = {
     frameRadius     : 1.0,
     frameZ          : -0.2,
     frameSegments   : 60,
-    frameOpacity    : 0.5
+    frameOpacity    : 0.6
 }
 
 export const clockMaterial = {

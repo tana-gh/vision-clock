@@ -6,7 +6,8 @@ import * as Animation   from './animation'
 
 export const render = (
     pixiState     : PixiState .IPixiState,
-    threeState    : ThreeState.IThreeState,
+    threeState    : ThreeState.IThreeState
+) => (
     animationState: Animation.IAnimationState
 ) => {
     const rawPixiTexture = renderPixi(pixiState , animationState)
@@ -25,6 +26,5 @@ const renderThree = (
     animationState: Animation.IAnimationState,
     rawPixiTexture: Uint8Array | Uint8ClampedArray
 ) => {
-    R.forEach((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj, animationState))(threeState.objects)
     threeState.render(threeState, animationState, rawPixiTexture)
 }

@@ -1,32 +1,38 @@
 import * as THREE          from 'three'
 import * as R              from 'ramda'
+import * as ThreeState     from './threestate'
 import * as ThreeObject    from './threeobject'
 import * as CustomGeometry from './customgeometry'
 import * as Animation      from '../animation'
 import * as Interaction    from '../interaction'
 import * as C              from '../utils/constants'
 
-export const create = ({
-    radius,
-    hourHandLength,
-    hourHandWidth,
-    hourHandHeight,
-    minuteHandLength,
-    minuteHandWidth,
-    minuteHandHeight,
-    secondHandLength,
-    secondHandBack,
-    secondHandWidth,
-    secondHandHeight,
-    scaleLength,
-    scaleWidth,
-    scaleHeight,
-    baseScaleGap,
-    frameRadius,
-    frameZ,
-    frameSegments,
-    frameOpacity
-} = C.clockParams): ThreeObject.IThreeObject => {
+export const create = (
+    threeState: ThreeState.IThreeState,
+    parent    : THREE.Object3D,
+    timestamp : number,
+    {
+        radius,
+        hourHandLength,
+        hourHandWidth,
+        hourHandHeight,
+        minuteHandLength,
+        minuteHandWidth,
+        minuteHandHeight,
+        secondHandLength,
+        secondHandBack,
+        secondHandWidth,
+        secondHandHeight,
+        scaleLength,
+        scaleWidth,
+        scaleHeight,
+        baseScaleGap,
+        frameRadius,
+        frameZ,
+        frameSegments,
+        frameOpacity
+    } = C.clockParams
+): ThreeObject.IThreeObject => {
     const material   = createMaterial()
     const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material)
     const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material)
@@ -42,6 +48,10 @@ export const create = ({
             secondHand,
             scales
         },
+        threeState,
+        parent,
+        timestamp,
+        state: 'init',
         updateByAnimation,
         updateByInteraction,
         updateByTime
@@ -104,24 +114,55 @@ const createFrame = (
     return new THREE.Mesh(geometry, newMaterial)
 }
 
-const updateByAnimation = (obj: ThreeObject.IThreeObject, animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animation.IAnimationState) => {
+    switch (obj.state) {
+        case 'init':
+            obj.state = 'main'
+            updateByAnimation(obj)(animation)
+            return
+        case 'main':
+            return
+        case 'terminate':
+            return
+        default:
+            throw 'Invalid state'
+    }
 }
 
-const updateByInteraction = (obj: ThreeObject.IThreeObject, interaction: Interaction.IInteraction) => {
-    const axis = interaction.position
+const updateByInteraction = (obj: ThreeObject.IThreeObject) => (interaction: Interaction.IInteraction) => {
+    switch (obj.state) {
+        case 'init':
+            return
+        case 'main':
+            const axis = interaction.position
                  .clone()
                  .cross(new THREE.Vector3(0.0, 0.0, -1.0))
                  .normalize()
+            obj.elements.clock.setRotationFromAxisAngle(axis, interaction.position.length() * C.clockRotationAngle)
+            return
+        case 'terminate':
+            return
+        default:
+            throw 'Invalid state'
+    }
     
-    obj.elements.clock.setRotationFromAxisAngle(axis, interaction.position.length() * C.clockRotationAngle)
 }
 
-const updateByTime = (obj: ThreeObject.IThreeObject, time: Date) => {
-    const [h, m, s] = [time.getHours(), time.getMinutes(), time.getSeconds()]
-
-    updateHandByTime(obj.elements.hourHand  , (h % 12 * 60 * 60 + m * 60 + s) / (12 * 60 * 60))
-    updateHandByTime(obj.elements.minuteHand, (m * 60 + s) / (60 * 60))
-    updateHandByTime(obj.elements.secondHand, s / 60)
+const updateByTime = (obj: ThreeObject.IThreeObject) => (time: Date) => {
+    switch (obj.state) {
+        case 'init':
+            return
+        case 'main':
+            const [h, m, s] = [time.getHours(), time.getMinutes(), time.getSeconds()]
+            updateHandByTime(obj.elements.hourHand  , (h % 12 * 60 * 60 + m * 60 + s) / (12 * 60 * 60))
+            updateHandByTime(obj.elements.minuteHand, (m * 60 + s) / (60 * 60))
+            updateHandByTime(obj.elements.secondHand, s / 60)
+            return
+        case 'terminate':
+            return
+        default:
+            throw 'Invalid state'
+    }
 }
 
 const updateHandByTime = (hand: THREE.Object3D, ratio: number) => {

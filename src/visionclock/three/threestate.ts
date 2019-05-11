@@ -20,7 +20,7 @@ export interface IThreeState {
         animationState: Animation.IAnimationState,
         pixiTexture   : Uint8Array | Uint8ClampedArray
     ) => void
-    objects      : ThreeObject.IThreeObject[]
+    objects      : Set<ThreeObject.IThreeObject>
     subscriptions: Rx.Subscription[]
 }
 
@@ -59,7 +59,7 @@ export const create = (
         pixiMaterial,
         renderer,
         render       : render(width, height),
-        objects      : [],
+        objects      : new Set(),
         subscriptions: [],
     }
 
@@ -74,26 +74,44 @@ export const create = (
     const pixiSprite = new THREE.Sprite(pixiMaterial)
     pixiScene.add(pixiSprite)
 
-    const clock = ClockObject.create()
+    const clock = ClockObject.create(threeState, scene, Date.now())
     scene.add(clock.elements.clock)
-    threeState.objects.push(clock)
+    threeState.objects.add(clock)
 
-    const lights = Lights.create()
+    const lights = Lights.create(threeState, scene, Date.now())
     scene.add(lights.elements.lights)
-    threeState.objects.push(lights)
+    threeState.objects.add(lights)
 
     scene.fog = new THREE.Fog(C.fogColor)
 
-    R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = interactions.subscribe(ii =>
-            R.forEach<Interaction.IInteraction>(i => obj.updateByInteraction(obj, i))(ii))
-        threeState.subscriptions.push(sub)
-    })(threeState.objects)
+    threeState.subscriptions.push(
+        animations.subscribe(a =>
+            R.pipe(
+                R.map((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj)),
+                R.juxt
+            )([...threeState.objects])(a)
+        )
+    )
 
-    R.forEach((obj: ThreeObject.IThreeObject) => {
-        const sub = times.subscribe(d => obj.updateByTime(obj, d))
-        threeState.subscriptions.push(sub)
-    })(threeState.objects)
+    threeState.subscriptions.push(
+        interactions.subscribe(ii =>
+            R.forEach(
+                R.pipe(
+                    R.map((obj: ThreeObject.IThreeObject) => obj.updateByInteraction(obj)),
+                    R.juxt
+                )([...threeState.objects])
+            )(ii)
+        )
+    )
+
+    threeState.subscriptions.push(
+        times.subscribe(t =>
+            R.pipe(
+                R.map((obj: ThreeObject.IThreeObject) => obj.updateByTime(obj)),
+                R.juxt
+            )([...threeState.objects])(t)
+        )
+    )
     
     return threeState
 }
