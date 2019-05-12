@@ -15,13 +15,12 @@ export interface IThreeState {
     pixiCamera  : THREE.OrthographicCamera
     pixiMaterial: THREE.SpriteMaterial
     renderer    : THREE.WebGLRenderer
-    render      : (
-        threeState    : IThreeState,
+    objects     : Set<ThreeObject.IThreeObject>
+    render?     : (
         animationState: Animation.IAnimationState,
         pixiTexture   : Uint8Array | Uint8ClampedArray
     ) => void
-    objects      : Set<ThreeObject.IThreeObject>
-    subscriptions: Rx.Subscription[]
+    dispose?: () => void
 }
 
 export const create = (
@@ -58,9 +57,7 @@ export const create = (
         pixiCamera,
         pixiMaterial,
         renderer,
-        render       : render(width, height),
-        objects      : new Set(),
-        subscriptions: [],
+        objects: new Set()
     }
 
     camera.position.set(0.0, 0.0, 5.0)
@@ -84,34 +81,38 @@ export const create = (
 
     scene.fog = new THREE.Fog(C.fogColor)
 
-    threeState.subscriptions.push(
+    const subscriptions = [
         animations.subscribe(a =>
             R.pipe(
-                R.map((obj: ThreeObject.IThreeObject) => obj.updateByAnimation(obj)),
+                R.map((obj: ThreeObject.IThreeObject) => obj.updateByAnimation!),
                 R.juxt
             )([...threeState.objects])(a)
-        )
-    )
+        ),
 
-    threeState.subscriptions.push(
         interactions.subscribe(ii =>
             R.forEach(
                 R.pipe(
-                    R.map((obj: ThreeObject.IThreeObject) => obj.updateByInteraction(obj)),
+                    R.map((obj: ThreeObject.IThreeObject) => obj.updateByInteraction!),
                     R.juxt
                 )([...threeState.objects])
             )(ii)
-        )
-    )
-
-    threeState.subscriptions.push(
+        ),
+        
         times.subscribe(t =>
             R.pipe(
-                R.map((obj: ThreeObject.IThreeObject) => obj.updateByTime(obj)),
+                R.map((obj: ThreeObject.IThreeObject) => obj.updateByTime!),
                 R.juxt
             )([...threeState.objects])(t)
         )
-    )
+    ]
+
+    threeState.render = render(threeState, width, height)
+
+    threeState.dispose = () => {
+        threeState.renderer.dispose()
+        R.forEach((obj: ThreeObject.IThreeObject) => obj.dispose!())([...threeState.objects])
+        R.forEach((s: Rx.Subscription) => s.unsubscribe())(subscriptions)
+    }
     
     return threeState
 }
@@ -119,11 +120,7 @@ export const create = (
 export const resizeRenderer = (threeState: IThreeState, width: number, height: number) => {
     setStyle(threeState.renderer.domElement, width, height)
     setRendererSize(threeState)
-    threeState.render = render(width, height)
-}
-
-export const dispose = (threeState: IThreeState) => {
-    R.forEach((s: Rx.Subscription) => s.unsubscribe())(threeState.subscriptions)
+    threeState.render = render(threeState, width, height)
 }
 
 const setStyle = (element: HTMLElement, width: number, height: number) => {
@@ -159,8 +156,8 @@ const setCameraSize = (threeState: IThreeState, width: number, height: number) =
     }
 }
 
-const render = (width: number, height: number) =>
-(threeState: IThreeState, animationState: Animation.IAnimationState, rawPixiTexture: Uint8Array | Uint8ClampedArray) => {
+const render = (threeState: IThreeState, width: number, height: number) =>
+(animationState: Animation.IAnimationState, rawPixiTexture: Uint8Array | Uint8ClampedArray) => {
     const pixiTexture = new THREE.DataTexture(rawPixiTexture, width, height, THREE.RGBAFormat)
     pixiTexture.needsUpdate = true
     threeState.pixiMaterial.map = pixiTexture

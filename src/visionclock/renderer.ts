@@ -18,7 +18,7 @@ const renderPixi = (
     pixiState     : PixiState.IPixiState,
     animationState: Animation.IAnimationState
 ) => {
-    return pixiState.render(pixiState, animationState)
+    return pixiState.render!(animationState)
 }
 
 const renderThree = (
@@ -26,5 +26,5 @@ const renderThree = (
     animationState: Animation.IAnimationState,
     rawPixiTexture: Uint8Array | Uint8ClampedArray
 ) => {
-    threeState.render(threeState, animationState, rawPixiTexture)
+    threeState.render!(animationState, rawPixiTexture)
 }

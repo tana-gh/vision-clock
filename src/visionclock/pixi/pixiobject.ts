@@ -8,13 +8,14 @@ export interface IPixiObject {
     elements: {
         [name: string]: PIXI.DisplayObject
     },
-    pixiState          : PixiState.IPixiState
-    parent             : PIXI.Container
-    timestamp          : number
-    state              : string
-    updateByAnimation  : (obj: IPixiObject) => (animation  : Animation.IAnimationState) => void
-    updateByInteraction: (obj: IPixiObject) => (interaction: Interaction.IInteraction ) => void
-    updateByTime       : (obj: IPixiObject) => (time       : Date                     ) => void
+    pixiState           : PixiState.IPixiState
+    parent              : PIXI.Container
+    timestamp           : number
+    state               : string
+    updateByAnimation  ?: (animation  : Animation.IAnimationState) => void
+    updateByInteraction?: (interaction: Interaction.IInteraction ) => void
+    updateByTime       ?: (time       : Date                     ) => void
+    dispose            ?: () => void
 }
 
 export const init = (pixiState: PixiState.IPixiState) => {
@@ -31,7 +32,10 @@ export const terminate = (pixiState: PixiState.IPixiState) => {
         objs => R.filter((obj: IPixiObject) => obj.state === 'terminate')(objs),
         R.forEach((obj: IPixiObject) => {
                 pixiState.objects.delete(obj)
-                R.forEachObjIndexed(elem => obj.parent.removeChild(elem))(obj.elements)
+                R.forEachObjIndexed((elem: PIXI.DisplayObject) => {
+                    obj.parent.removeChild(elem);
+                    elem.destroy()
+                })(obj.elements)
             }
         ),
     )([...pixiState.objects])

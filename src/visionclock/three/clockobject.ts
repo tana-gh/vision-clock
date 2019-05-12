@@ -34,32 +34,47 @@ export const create = (
     } = C.clockParams
 ): ThreeObject.IThreeObject => {
     const material   = createMaterial()
-    const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material)
-    const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material)
-    const secondHand = createHand(secondHandLength, secondHandWidth, secondHandHeight, hourHandHeight + minuteHandHeight + secondHandHeight, secondHandBack, material)
-    const scales     = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, baseScaleGap, material)
-    const frame      = createFrame(frameRadius, frameZ, frameSegments, frameOpacity, material)
-    const clock      = new THREE.Object3D().add(hourHand, minuteHand, secondHand, scales, frame)
-    return {
+    const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material[0])
+    const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material[0])
+    const secondHand = createHand(secondHandLength, secondHandWidth, secondHandHeight, hourHandHeight + minuteHandHeight + secondHandHeight, secondHandBack, material[0])
+    const scales     = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, baseScaleGap, material[0])
+    const frame      = createFrame(frameRadius, frameZ, frameSegments, frameOpacity, material[0])
+    const clock      = new THREE.Object3D().add(hourHand[0], minuteHand[0], secondHand[0], scales[0], frame[0])
+    const obj: ThreeObject.IThreeObject = {
         elements: {
             clock,
-            hourHand,
-            minuteHand,
-            secondHand,
-            scales
+            hourHand  : hourHand  [0],
+            minuteHand: minuteHand[0],
+            secondHand: secondHand[0],
+            scales    : scales    [0]
         },
         threeState,
         parent,
         timestamp,
-        state: 'init',
-        updateByAnimation,
-        updateByInteraction,
-        updateByTime
+        state: 'init'
     }
+
+    obj.updateByAnimation   = updateByAnimation  (obj),
+    obj.updateByInteraction = updateByInteraction(obj),
+    obj.updateByTime        = updateByTime       (obj),
+    obj.dispose = () => R.juxt([
+        material  [1],
+        hourHand  [1],
+        minuteHand[1],
+        secondHand[1],
+        scales    [1],
+        frame     [1]
+    ])()
+    
+    return obj
 }
 
-const createMaterial = () => {
-    return new THREE.MeshPhysicalMaterial(C.clockMaterial)
+const createMaterial = (): [THREE.Material, () => void] => {
+    const material = new THREE.MeshPhysicalMaterial(C.clockMaterial)
+    return [
+        material,
+        () => material.dispose()
+    ]
 }
 
 const createHand = (
@@ -69,10 +84,13 @@ const createHand = (
     z       : number,
     back    : number,
     material: THREE.Material
-) => {
+): [THREE.Object3D, () => void] => {
     const vertices = R.map(C.mapVertices(length, width, height, z, back))(C.clockHandVertices)
     const geometry = CustomGeometry.create(vertices, C.clockHandIndices)
-    return new THREE.Mesh(geometry, material)
+    return [
+        new THREE.Mesh(geometry, material),
+        () => geometry.dispose()
+    ]
 }
 
 const createAllScales = (
@@ -82,22 +100,28 @@ const createAllScales = (
     height  : number,
     gap     : number,
     material: THREE.Material
-) => {
+): [THREE.Object3D, () => void] => {
     const vertices = R.map(C.mapVertices(length, width, height, 0.0, 0.0))(C.clockScaleVertices)
     const scales   = R.map(createOneScale(radius, vertices, material))(R.range(0, 13))
-    scales[ 0].translateX( gap)
-    scales[12].translateX(-gap)
-    return new THREE.Object3D().add(...scales)
+    scales[ 0][0].translateX( gap)
+    scales[12][0].translateX(-gap)
+    return [
+        new THREE.Object3D().add(...R.map(s => s[0])(scales)),
+        () => R.forEach(s => s[1]())(scales)
+    ]
 }
 
 const createOneScale = (
     radius  : number,
     vertices: number[],
     material: THREE.Material
-) => (index: number) => {
+) => (index: number): [THREE.Object3D, () => void] => {
     const geometry = CustomGeometry.create(vertices, C.clockScaleIndices)
     const mesh     = new THREE.Mesh(geometry, material).translateY(radius)
-    return new THREE.Object3D().add(mesh).rotateZ(-index * 2 * Math.PI / 12)
+    return [
+        new THREE.Object3D().add(mesh).rotateZ(-index * 2 * Math.PI / 12),
+        () => geometry.dispose()
+    ]
 }
 
 const createFrame = (
@@ -106,12 +130,15 @@ const createFrame = (
     frameSegments: number,
     frameOpacity : number,
     material: THREE.Material
-) => {
+): [THREE.Object3D, () => void] => {
     const geometry    = new THREE.CircleGeometry(frameRadius, frameSegments).translate(0.0, 0.0, frameZ)
     const newMaterial = <THREE.MeshPhysicalMaterial>material.clone()
     newMaterial.transparent = true
     newMaterial.opacity     = frameOpacity
-    return new THREE.Mesh(geometry, newMaterial)
+    return [
+        new THREE.Mesh(geometry, newMaterial),
+        () => geometry.dispose()
+    ]
 }
 
 const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animation.IAnimationState) => {

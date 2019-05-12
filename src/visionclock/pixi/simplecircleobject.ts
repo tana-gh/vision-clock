@@ -20,7 +20,7 @@ export const create = (
     circle.x = x
     circle.y = y
 
-    return {
+    const obj: PixiObject.IPixiObject = {
         elements: {
             circle
         },
@@ -28,12 +28,20 @@ export const create = (
         parent,
         timestamp,
         state: 'init',
-        updateByAnimation,
-        updateByInteraction,
-        updateByTime
     }
+
+    obj.updateByAnimation   = updateByAnimation  (obj),
+    obj.updateByInteraction = updateByInteraction(obj),
+    obj.updateByTime        = updateByTime       (obj),
+    obj.dispose             = dispose            (obj)
+    
+    return obj
 }
 
-const updateByInteraction = () => () => {}
+const updateByInteraction = (obj: PixiObject.IPixiObject) => () => {}
 
-const updateByTime = () => () => {}
+const updateByTime = (obj: PixiObject.IPixiObject) => () => {}
+
+const dispose = (obj: PixiObject.IPixiObject) => () => {
+    obj.elements.circle.destroy()
+}

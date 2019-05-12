@@ -8,9 +8,9 @@ import * as Renderer    from './renderer'
 import * as Random      from './utils/random'
 
 export interface IVisionClockState {
-    subscription: Rx.Subscription
     pixiState   : PixiState .IPixiState
     threeState  : ThreeState.IThreeState
+    dispose     : () => void
 }
 
 export const load = (parent: HTMLElement): IVisionClockState => {
@@ -25,19 +25,19 @@ export const load = (parent: HTMLElement): IVisionClockState => {
     const subscription = animations.subscribe(Renderer.render(pixiState, threeState))
 
     parent.appendChild(threeState.renderer.domElement)
-    window.addEventListener('resize', () => {
+
+    const resize = () => {
         PixiState .resizeRenderer(pixiState , parent.clientWidth, parent.clientHeight)
         ThreeState.resizeRenderer(threeState, parent.clientWidth, parent.clientHeight)
-    })
-
-    return { subscription, pixiState, threeState }
-}
-
-export const dispose = () => {
-    if ('visionClockState' in window) {
-        const vc: IVisionClockState = (<any>window).visionClockState
-        vc.subscription.unsubscribe()
-        PixiState .dispose(vc.pixiState)
-        ThreeState.dispose(vc.threeState)
     }
+    window.addEventListener('resize', resize)
+
+    const dispose = () => {
+        subscription.unsubscribe()
+        pixiState .dispose!()
+        threeState.dispose!()
+        window.removeEventListener('resize', resize)
+    }
+
+    return { pixiState, threeState, dispose }
 }

@@ -19,18 +19,22 @@ export const create = (
         lights.add(light)
     }, C.lightParams)
     
-    return {
+    const obj: ThreeObject.IThreeObject = {
         elements: {
             lights
         },
         threeState,
         parent,
         timestamp,
-        state: 'init',
-        updateByAnimation,
-        updateByInteraction,
-        updateByTime
+        state: 'init'
     }
+
+    obj.updateByAnimation   = updateByAnimation  (obj)
+    obj.updateByInteraction = updateByInteraction(obj)
+    obj.updateByTime        = updateByTime       (obj)
+    obj.dispose             = dispose            (obj)
+
+    return obj
 }
 
 const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animation.IAnimationState) => {
@@ -52,4 +56,7 @@ const updateByInteraction = (obj: ThreeObject.IThreeObject) => (interaction: Int
 }
 
 const updateByTime = (obj: ThreeObject.IThreeObject) => (time: Date) => {
+}
+
+const dispose = (obj: ThreeObject.IThreeObject) => () => {
 }

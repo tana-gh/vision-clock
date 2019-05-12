@@ -8,13 +8,14 @@ export interface IThreeObject {
     elements: {
         [name: string]: THREE.Object3D
     }
-    threeState         : ThreeState.IThreeState
-    parent             : THREE.Object3D
-    timestamp          : number
-    state              : string
-    updateByAnimation  : (obj: IThreeObject) => (animation  : Animation.IAnimationState) => void
-    updateByInteraction: (obj: IThreeObject) => (interaction: Interaction.IInteraction ) => void
-    updateByTime       : (obj: IThreeObject) => (time       : Date                     ) => void
+    threeState          : ThreeState.IThreeState
+    parent              : THREE.Object3D
+    timestamp           : number
+    state               : string
+    updateByAnimation  ?: (animation  : Animation.IAnimationState) => void
+    updateByInteraction?: (interaction: Interaction.IInteraction ) => void
+    updateByTime       ?: (time       : Date                     ) => void
+    dispose            ?: () => void
 }
 
 export const init = (threeState: ThreeState.IThreeState) => {

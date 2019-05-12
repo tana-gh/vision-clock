@@ -9,10 +9,10 @@ import * as MovingCircleObject from './movingcircleobject'
 import * as Random      from '../utils/random'
 
 export interface IPixiState {
-    application  : PIXI.Application
-    render       : (pixiState: IPixiState, animationState: Animation.IAnimationState) => Uint8Array | Uint8ClampedArray
-    objects      : Set<PixiObject.IPixiObject>
-    subscriptions: Rx.Subscription[]
+    application: PIXI.Application
+    objects    : Set<PixiObject.IPixiObject>
+    render ?   : (animationState: Animation.IAnimationState) => Uint8Array | Uint8ClampedArray
+    dispose?   : () => void
 }
 
 export const create = (
@@ -32,15 +32,13 @@ export const create = (
     
     const pixiState: IPixiState = {
         application,
-        render,
-        objects      : new Set(),
-        subscriptions: []
+        objects: new Set()
     }
 
     application.stage.scale.set(1.0, -1.0)
     application.stage.pivot = new PIXI.Point(-width * 0.5, height * 0.5)
 
-    pixiState.subscriptions.push(
+    const subscriptions = [
         Rx.pipe(
             RxOp.map((a: Animation.IAnimationState) => Math.floor(a.total / 60.0)),
             RxOp.distinctUntilChanged()
@@ -58,47 +56,44 @@ export const create = (
                 (x, y) => x < pixiState.application.screen.width * 0.8
             )
             pixiState.objects.add(circle)
-        })(R.range(1, 3)))
-    )
+        })(R.range(1, 3))),
 
-    pixiState.subscriptions.push(
-        animations.subscribe(_ => PixiObject.init(pixiState))
-    )
+        animations.subscribe(_ => PixiObject.init(pixiState)),
 
-    pixiState.subscriptions.push(
         animations.subscribe(a =>
             R.pipe(
-                R.map((obj: PixiObject.IPixiObject) => obj.updateByAnimation(obj)),
+                R.map((obj: PixiObject.IPixiObject) => obj.updateByAnimation!),
                 R.juxt
             )([...pixiState.objects])(a)
-        )
-    )
+        ),
 
-    pixiState.subscriptions.push(
         interactions.subscribe(ii =>
             R.forEach(
                 R.pipe(
-                    R.map((obj: PixiObject.IPixiObject) => obj.updateByInteraction(obj)),
+                    R.map((obj: PixiObject.IPixiObject) => obj.updateByInteraction!),
                     R.juxt
                 )([...pixiState.objects])
             )(ii)
-        )
-    )
+        ),
 
-    pixiState.subscriptions.push(
         times.subscribe(t =>
             R.pipe(
-                R.map((obj: PixiObject.IPixiObject) => obj.updateByTime(obj)),
+                R.map((obj: PixiObject.IPixiObject) => obj.updateByTime!),
                 R.juxt
             )([...pixiState.objects])(t)
-        )
-    )
+        ),
 
-    pixiState.subscriptions.push(
         animations.subscribe(_ =>PixiObject.terminate(pixiState))
-    )
+    ]
 
     application.ticker.add(tick(pixiState))
+
+    pixiState.render = render(pixiState)
+
+    pixiState.dispose = () => {
+        pixiState.application.destroy(true, true)
+        R.forEach((s: Rx.Subscription) => s.unsubscribe())(subscriptions)
+    }
 
     return pixiState
 }
@@ -108,11 +103,7 @@ export const resizeRenderer = (pixiState: IPixiState, width: number, height: num
     pixiState.application.stage.pivot = new PIXI.Point(-width * 0.5, height * 0.5)
 }
 
-export const dispose = (pixiState: IPixiState) => {
-    R.forEach((s: Rx.Subscription) => s.unsubscribe())(pixiState.subscriptions)
-}
-
-const render = (pixiState: IPixiState, animationState: Animation.IAnimationState) => {
+const render = (pixiState: IPixiState) => (animationState: Animation.IAnimationState) => {
     pixiState.application.ticker.update(animationState.total)
     return pixiState.application.renderer.extract.pixels()
 }
