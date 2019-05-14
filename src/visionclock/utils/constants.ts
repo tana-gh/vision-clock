@@ -24,7 +24,7 @@ export const clockParams = {
     frameRadius     : 1.0,
     frameZ          : -0.2,
     frameSegments   : 60,
-    frameOpacity    : 0.6
+    frameOpacity    : 0.85
 }
 
 export const clockMaterial = {
@@ -102,9 +102,9 @@ export const mapVertices = (
 export const clockRotationAngle = 2.0 * Math.PI / 24.0
 
 export const lightParams = [
-    { color: 0xFFFFFF, x:  1.0, y:  1.0, z: 1.0 },
+    { color: 0xFFFFFF, x:  1.0, y:  1.0, z: 0.5 },
     { color: 0xFFCC88, x:  1.5, y:  1.5, z: 3.0 },
     { color: 0x884444, x: -4.0, y: -4.0, z: 0.0 },
-    { color: 0x888844, x:  0.0, y: -3.0, z: 1.0 },
+    { color: 0x888844, x:  0.0, y: -3.0, z: 0.5 },
     { color: 0xCCCCCC, x:  0.0, y:  2.0, z: 0.0 }
 ]

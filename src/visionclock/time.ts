@@ -1,7 +1,6 @@
 import * as Rx        from 'rxjs'
 import * as RxOp      from 'rxjs/operators'
 import * as Animation from './animation'
-import * as C         from './utils/constants'
 
 export const create = (animations: Rx.Observable<Animation.IAnimationState>) => {
     return Rx.pipe(

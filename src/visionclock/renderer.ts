@@ -1,7 +1,5 @@
-import * as R           from 'ramda'
 import * as PixiState   from './pixi/pixistate'
 import * as ThreeState  from './three/threestate'
-import * as ThreeObject from './three/threeobject'
 import * as Animation   from './animation'
 
 export const render = (

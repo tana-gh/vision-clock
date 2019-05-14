@@ -2,6 +2,7 @@ import * as PIXI        from 'pixi.js'
 import * as Rx          from 'rxjs'
 import * as RxOp        from 'rxjs/operators'
 import * as R           from 'ramda'
+import * as Color       from 'color'
 import * as Animation   from '../animation'
 import * as Interaction from '../interaction'
 import * as PixiObject  from './pixiobject'
@@ -47,12 +48,14 @@ export const create = (
             const circle = MovingCircleObject.create(
                 -width * 0.8,
                 (Random.next() - 0.5) * height,
-                Random.next() * 10.0 + 4.0,
-                Random.next() * 0xFFFFFF,
+                (Random.next() * 0.15 + 0.05) * height,
+                Color.hsl(Random.next() * 360.0, 100.0, 99.0).rgbNumber(),
+                PIXI.BLEND_MODES.ADD,
                 pixiState,
                 application.stage,
                 Date.now(),
-                Random.next() + 0.5, 0.0,
+                Random.next() + 0.5,
+                0.0,
                 (x, y) => x < pixiState.application.screen.width * 0.8
             )
             pixiState.objects.add(circle)

@@ -1,4 +1,3 @@
-import * as Rx          from 'rxjs'
 import * as ThreeState  from './three/threestate'
 import * as PixiState   from './pixi/pixistate'
 import * as Animation   from './animation'

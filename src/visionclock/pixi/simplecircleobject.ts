@@ -8,17 +8,16 @@ export const create = (
     y        : number,
     radius   : number,
     color    : number,
+    blendMode: number,
     pixiState: PixiState.IPixiState,
     parent   : PIXI.Container,
     timestamp: number,
     updateByAnimation: (obj: PixiObject.IPixiObject) => (animation: Animation.IAnimationState) => void
 ): PixiObject.IPixiObject => {
     const circle = new PIXI.Graphics()
-        .beginFill(color)
-        .drawCircle(0.0, 0.0, radius)
-        .endFill()
     circle.x = x
     circle.y = y
+    circle.blendMode = blendMode
 
     const obj: PixiObject.IPixiObject = {
         elements: {
