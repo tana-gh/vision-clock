@@ -21,8 +21,6 @@ export const create = (
     return SimpleCircleObject.create(
         x,
         y,
-        radius,
-        color,
         blendMode,
         pixiState,
         parent,

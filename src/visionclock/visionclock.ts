@@ -16,10 +16,10 @@ export const load = (parent: HTMLElement): IVisionClockState => {
     const animations   = Animation.create(Date.now())
     const interactions = Interaction.create(animations, parent, window)
     const times        = Time.create(animations)
-    Random.set(Date.now())
+    const random       = Random.create(Date.now())
     
-    const pixiState    = PixiState .create(parent.clientWidth, parent.clientHeight, animations, interactions, times)
-    const threeState   = ThreeState.create(parent.clientWidth, parent.clientHeight, animations, interactions, times)
+    const pixiState    = PixiState .create(parent.clientWidth, parent.clientHeight, animations, interactions, times, random)
+    const threeState   = ThreeState.create(parent.clientWidth, parent.clientHeight, animations, interactions, times, random)
 
     const subscription = animations.subscribe(Renderer.render(pixiState, threeState))
 

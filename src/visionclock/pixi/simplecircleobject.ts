@@ -6,8 +6,6 @@ import * as PixiObject from './pixiobject'
 export const create = (
     x        : number,
     y        : number,
-    radius   : number,
-    color    : number,
     blendMode: number,
     pixiState: PixiState.IPixiState,
     parent   : PIXI.Container,
@@ -23,6 +21,7 @@ export const create = (
         elements: {
             circle
         },
+        filters: {},
         pixiState,
         parent,
         timestamp,

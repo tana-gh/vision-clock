@@ -7,6 +7,7 @@ import * as ThreeObject from './threeobject'
 import * as ClockObject from './clockobject'
 import * as Lights      from './lights'
 import * as C           from '../utils/constants'
+import * as Random      from '../utils/random'
 
 export interface IThreeState {
     scene       : THREE.Scene
@@ -28,7 +29,8 @@ export const create = (
     height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction[]>,
-    times       : Rx.Observable<Date>
+    times       : Rx.Observable<Date>,
+    random      : Random.IRandom
 ): IThreeState => {
     const scene  = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera

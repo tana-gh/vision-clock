@@ -21,7 +21,8 @@ export const create = (
     height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction[]>,
-    times       : Rx.Observable<Date>
+    times       : Rx.Observable<Date>,
+    random      : Random.IRandom
 ): IPixiState => {
     const application = new PIXI.Application({
         width,
@@ -46,15 +47,15 @@ export const create = (
         )(animations)
         .subscribe(_ => R.forEach(_ => {
             const circle = MovingCircleObject.create(
-                -width * 0.8,
-                (Random.next() - 0.5) * height,
-                (Random.next() * 0.15 + 0.05) * height,
-                Color.hsl(Random.next() * 360.0, 100.0, 99.0).rgbNumber(),
+                -application.renderer.screen.width * 0.8,
+                (random.next!() - 0.5) * application.renderer.screen.height,
+                (random.next!() * 0.15 + 0.05) * application.renderer.screen.height,
+                Color.hsl(random.next!() * 360.0, 100.0, 99.0).rgbNumber(),
                 PIXI.BLEND_MODES.ADD,
                 pixiState,
                 application.stage,
                 Date.now(),
-                Random.next() + 0.5,
+                random.next!() + 0.5,
                 0.0,
                 (x, y) => x < pixiState.application.screen.width * 0.8
             )

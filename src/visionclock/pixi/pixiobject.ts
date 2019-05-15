@@ -8,6 +8,9 @@ export interface IPixiObject {
     elements: {
         [name: string]: PIXI.DisplayObject
     },
+    filters: {
+        [name: string]: PIXI.Filter<any>
+    },
     pixiState           : PixiState.IPixiState
     parent              : PIXI.Container
     timestamp           : number
