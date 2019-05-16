@@ -2,13 +2,13 @@ import * as THREE       from 'three'
 import * as R           from 'ramda'
 import * as Animation   from '../animation'
 import * as Interaction from '../interaction'
-import * as ThreeState  from './threestate'
+import * as SceneState  from './scenestate'
 
-export interface IThreeObject {
+export interface IDisplayObject {
     elements: {
         [name: string]: THREE.Object3D
     }
-    threeState          : ThreeState.IThreeState
+    sceneState          : SceneState.ISceneState
     parent              : THREE.Object3D
     timestamp           : number
     state               : string
@@ -18,26 +18,27 @@ export interface IThreeObject {
     dispose            ?: () => void
 }
 
-export const init = (threeState: ThreeState.IThreeState) => {
+export const init = (sceneState: SceneState.ISceneState) => {
     R.pipe(
-        objs => R.filter((obj: IThreeObject) => obj.state === 'init')(objs),
-        R.forEach((obj: IThreeObject) =>
+        objs => R.filter((obj: IDisplayObject) => obj.state === 'init')(objs),
+        R.forEach((obj: IDisplayObject) =>
             obj.parent.add(...R.values(obj.elements))
         )
-    )([...threeState.objects])
+    )([...sceneState.objects])
 }
 
-export const terminate = (threeState: ThreeState.IThreeState) => {
+export const terminate = (sceneState: SceneState.ISceneState) => {
     R.pipe(
-        objs => R.filter((obj: IThreeObject) => obj.state === 'terminate')(objs),
-        R.forEach((obj: IThreeObject) => {
-                threeState.objects.delete(obj)
+        objs => R.filter((obj: IDisplayObject) => obj.state === 'terminate')(objs),
+        R.forEach((obj: IDisplayObject) => {
+                sceneState.objects.delete(obj)
                 R.forEachObjIndexed(elem => obj.parent.remove(elem))(obj.elements)
+                obj.dispose!()
             }
         ),
-    )([...threeState.objects])
+    )([...sceneState.objects])
 }
 
-export const getTime = (obj: IThreeObject, animation: Animation.IAnimationState) => {
+export const getTime = (obj: IDisplayObject, animation: Animation.IAnimationState) => {
     return animation.now - obj.timestamp
 }

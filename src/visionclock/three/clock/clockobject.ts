@@ -1,14 +1,14 @@
 import * as THREE          from 'three'
 import * as R              from 'ramda'
-import * as ThreeState     from './threestate'
-import * as ThreeObject    from './threeobject'
-import * as CustomGeometry from './customgeometry'
-import * as Animation      from '../animation'
-import * as Interaction    from '../interaction'
-import * as C              from '../utils/constants'
+import * as Animation      from '../../animation'
+import * as Interaction    from '../../interaction'
+import * as SceneState     from '../scenestate'
+import * as DisplayObject  from '../displayobject'
+import * as CustomGeometry from '../customgeometry'
+import * as C              from '../../utils/constants'
 
 export const create = (
-    threeState: ThreeState.IThreeState,
+    sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     timestamp : number,
     {
@@ -32,7 +32,7 @@ export const create = (
         frameSegments,
         frameOpacity
     } = C.clockParams
-): ThreeObject.IThreeObject => {
+): DisplayObject.IDisplayObject => {
     const material   = createMaterial()
     const hourHand   = createHand(hourHandLength  , hourHandWidth  , hourHandHeight  , hourHandHeight, 0.0, material[0])
     const minuteHand = createHand(minuteHandLength, minuteHandWidth, minuteHandHeight, hourHandHeight + minuteHandHeight, 0.0, material[0])
@@ -40,7 +40,7 @@ export const create = (
     const scales     = createAllScales(radius, scaleLength, scaleWidth, scaleHeight, baseScaleGap, material[0])
     const frame      = createFrame(frameRadius, frameZ, frameSegments, frameOpacity, material[0])
     const clock      = new THREE.Object3D().add(hourHand[0], minuteHand[0], secondHand[0], scales[0], frame[0])
-    const obj: ThreeObject.IThreeObject = {
+    const obj: DisplayObject.IDisplayObject = {
         elements: {
             clock,
             hourHand  : hourHand  [0],
@@ -48,7 +48,7 @@ export const create = (
             secondHand: secondHand[0],
             scales    : scales    [0]
         },
-        threeState,
+        sceneState,
         parent,
         timestamp,
         state: 'init'
@@ -141,7 +141,7 @@ const createFrame = (
     ]
 }
 
-const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: DisplayObject.IDisplayObject) => (animation: Animation.IAnimationState) => {
     switch (obj.state) {
         case 'init':
             obj.state = 'main'
@@ -156,7 +156,7 @@ const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animati
     }
 }
 
-const updateByInteraction = (obj: ThreeObject.IThreeObject) => (interaction: Interaction.IInteraction) => {
+const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interaction: Interaction.IInteraction) => {
     switch (obj.state) {
         case 'init':
             return
@@ -175,7 +175,7 @@ const updateByInteraction = (obj: ThreeObject.IThreeObject) => (interaction: Int
     
 }
 
-const updateByTime = (obj: ThreeObject.IThreeObject) => (time: Date) => {
+const updateByTime = (obj: DisplayObject.IDisplayObject) => (time: Date) => {
     switch (obj.state) {
         case 'init':
             return

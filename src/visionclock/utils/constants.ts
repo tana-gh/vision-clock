@@ -3,6 +3,13 @@ export const visionClockClass = 'visionclock'
 
 export const timerPeriod = 10
 
+export const perspectiveParams = {
+    fov : 30.0,
+    near: 0.1,
+    far : 100.0,
+    z   : 5.0
+}
+
 export const fogColor = 0x000000
 
 export const clockParams = {
@@ -17,8 +24,8 @@ export const clockParams = {
     secondHandWidth : 0.01,
     secondHandHeight: 0.01,
     secondHandBack  : 0.15,
-    scaleLength     : 0.1,
-    scaleWidth      : 0.005,
+    scaleLength     : 0.12,
+    scaleWidth      : 0.006,
     scaleHeight     : 0.005,
     baseScaleGap    : 0.02,
     frameRadius     : 1.0,

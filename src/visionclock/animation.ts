@@ -1,5 +1,5 @@
-import * as Rx          from 'rxjs'
-import * as RxOp        from 'rxjs/operators'
+import * as Rx   from 'rxjs'
+import * as RxOp from 'rxjs/operators'
 
 export interface IAnimationState {
     start   : number

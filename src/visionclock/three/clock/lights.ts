@@ -1,16 +1,16 @@
-import * as THREE       from 'three'
-import * as R           from 'ramda'
-import * as ThreeState  from './threestate'
-import * as ThreeObject from './threeobject'
-import * as Animation   from '../animation'
-import * as Interaction from '../interaction'
-import * as C           from '../utils/constants'
+import * as THREE         from 'three'
+import * as R             from 'ramda'
+import * as Animation     from '../../animation'
+import * as Interaction   from '../../interaction'
+import * as SceneState    from '../scenestate'
+import * as DisplayObject from '../displayobject'
+import * as C             from '../../utils/constants'
 
 export const create = (
-    threeState: ThreeState.IThreeState,
+    sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     timestamp : number
-): ThreeObject.IThreeObject => {
+): DisplayObject.IDisplayObject => {
     const lights = new THREE.Object3D()
     
     R.forEach(param => {
@@ -19,11 +19,11 @@ export const create = (
         lights.add(light)
     }, C.lightParams)
     
-    const obj: ThreeObject.IThreeObject = {
+    const obj: DisplayObject.IDisplayObject = {
         elements: {
             lights
         },
-        threeState,
+        sceneState,
         parent,
         timestamp,
         state: 'init'
@@ -37,7 +37,7 @@ export const create = (
     return obj
 }
 
-const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: DisplayObject.IDisplayObject) => (animation: Animation.IAnimationState) => {
     switch (obj.state) {
         case 'init':
             obj.state = 'main'
@@ -52,11 +52,11 @@ const updateByAnimation = (obj: ThreeObject.IThreeObject) => (animation: Animati
     }
 }
 
-const updateByInteraction = (obj: ThreeObject.IThreeObject) => (interaction: Interaction.IInteraction) => {
+const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interaction: Interaction.IInteraction) => {
 }
 
-const updateByTime = (obj: ThreeObject.IThreeObject) => (time: Date) => {
+const updateByTime = (obj: DisplayObject.IDisplayObject) => (time: Date) => {
 }
 
-const dispose = (obj: ThreeObject.IThreeObject) => () => {
+const dispose = (obj: DisplayObject.IDisplayObject) => () => {
 }

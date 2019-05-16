@@ -1,42 +1,40 @@
-import * as ThreeState  from './three/threestate'
-import * as PixiState   from './pixi/pixistate'
-import * as Animation   from './animation'
-import * as Interaction from './interaction'
-import * as Time        from './time'
-import * as Renderer    from './renderer'
-import * as Random      from './utils/random'
+import * as Animation     from './animation'
+import * as Interaction   from './interaction'
+import * as Time          from './time'
+import * as RendererState from './three/rendererstate'
+import * as ClockState    from './three/clock/clockstate'
+import * as Random        from './utils/random'
 
 export interface IVisionClockState {
-    pixiState   : PixiState .IPixiState
-    threeState  : ThreeState.IThreeState
-    dispose     : () => void
+    rendererState: RendererState.IRendererState
+    dispose      : () => void
 }
 
 export const load = (parent: HTMLElement): IVisionClockState => {
-    const animations   = Animation.create(Date.now())
+    const now          = Date.now()
+    const animations   = Animation  .create(now)
     const interactions = Interaction.create(animations, parent, window)
-    const times        = Time.create(animations)
-    const random       = Random.create(Date.now())
-    
-    const pixiState    = PixiState .create(parent.clientWidth, parent.clientHeight, animations, interactions, times, random)
-    const threeState   = ThreeState.create(parent.clientWidth, parent.clientHeight, animations, interactions, times, random)
+    const times        = Time       .create(animations)
+    const random       = Random     .create(now)
 
-    const subscription = animations.subscribe(Renderer.render(pixiState, threeState))
+    const [width, height] = [parent.clientWidth, parent.clientHeight]
+    const clockState      = ClockState   .create(width, height, animations, interactions, times, random)
+    const rendererState   = RendererState.create(width, height, [ clockState ])
 
-    parent.appendChild(threeState.renderer.domElement)
+    const subscription = animations.subscribe(rendererState.render!)
+
+    parent.appendChild(rendererState.renderer.domElement)
 
     const resize = () => {
-        PixiState .resizeRenderer(pixiState , parent.clientWidth, parent.clientHeight)
-        ThreeState.resizeRenderer(threeState, parent.clientWidth, parent.clientHeight)
+        rendererState.resize!(width, height)
     }
     window.addEventListener('resize', resize)
 
     const dispose = () => {
         subscription.unsubscribe()
-        pixiState .dispose!()
-        threeState.dispose!()
+        rendererState.dispose!()
         window.removeEventListener('resize', resize)
     }
 
-    return { pixiState, threeState, dispose }
+    return { rendererState, dispose }
 }
