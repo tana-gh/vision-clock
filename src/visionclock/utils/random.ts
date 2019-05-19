@@ -1,20 +1,19 @@
 
 export interface IRandom {
-    seed : number
-    next?: () => number
+    seed: number
+    next: () => number
 }
 
-export const create = (seed: number) => {
-    const random: IRandom = {
-        seed
+export const create = (seed: number): IRandom => {
+    return {
+        seed,
+        next() {
+            return next(this)
+        }
     }
-
-    random.next = next(random)
-
-    return random
 }
 
-const next = (random: IRandom) => () => {
+const next = (random: IRandom) => {
     let value = random.seed
     value ^= value << 13
     value ^= value >> 17

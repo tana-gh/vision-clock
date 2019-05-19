@@ -1,44 +1,39 @@
-import * as THREE       from 'three'
-import * as R           from 'ramda'
-import * as Animation   from '../animation'
-import * as Interaction from '../interaction'
-import * as SceneState  from './scenestate'
+import * as THREE      from 'three'
+import * as R          from 'ramda'
+import * as Animation  from '../animation'
+import * as SceneState from './scenestate'
+import * as Behaviour  from './behaviour'
 
-export interface IDisplayObject {
-    elements: {
+export interface IDisplayObject extends Behaviour.IBehaviour {
+    rootElement: THREE.Object3D
+    elements   : {
         [name: string]: THREE.Object3D
     }
-    sceneState          : SceneState.ISceneState
-    parent              : THREE.Object3D
-    timestamp           : number
-    state               : string
-    updateByAnimation  ?: (animation  : Animation.IAnimationState) => void
-    updateByInteraction?: (interaction: Interaction.IInteraction ) => void
-    updateByTime       ?: (time       : Date                     ) => void
-    dispose            ?: () => void
 }
 
-export const init = (sceneState: SceneState.ISceneState) => {
-    R.pipe(
-        objs => R.filter((obj: IDisplayObject) => obj.state === 'init')(objs),
-        R.forEach((obj: IDisplayObject) =>
-            obj.parent.add(...R.values(obj.elements))
-        )
-    )([...sceneState.objects])
+export const updateByAnimation = (
+    obj         : IDisplayObject,
+    sceneState  : SceneState.ISceneState,
+    parent      : THREE.Object3D,
+    initialState: string,
+    behaviour   : (obj: IDisplayObject, animation: Animation.IAnimationState) => void
+) => (animation: Animation.IAnimationState) => {
+    switch (obj.state) {
+        case 'init':
+            sceneState.objects.add(obj)
+            parent.add(obj.rootElement)
+            obj.state = initialState
+            updateByAnimation(obj, sceneState, parent, initialState, behaviour)(animation)
+            return
+        case 'terminate':
+            parent.remove(obj.rootElement)
+            sceneState.objects.delete(obj)
+            obj.dispose()
+            return
+        default:
+            behaviour(obj, animation)
+    }
 }
 
-export const terminate = (sceneState: SceneState.ISceneState) => {
-    R.pipe(
-        objs => R.filter((obj: IDisplayObject) => obj.state === 'terminate')(objs),
-        R.forEach((obj: IDisplayObject) => {
-                sceneState.objects.delete(obj)
-                R.forEachObjIndexed(elem => obj.parent.remove(elem))(obj.elements)
-                obj.dispose!()
-            }
-        ),
-    )([...sceneState.objects])
-}
-
-export const getTime = (obj: IDisplayObject, animation: Animation.IAnimationState) => {
-    return animation.now - obj.timestamp
-}
+export const getTime = (obj: IDisplayObject, animation: Animation.IAnimationState) =>
+    Behaviour.getTime(obj, animation)

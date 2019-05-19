@@ -2,11 +2,11 @@ import * as THREE         from 'three'
 import * as DisplayObject from './displayobject'
 
 export interface ISceneState {
-    scene   : THREE.Scene
-    camera  : THREE.Camera
-    objects : Set<DisplayObject.IDisplayObject>
-    render ?: (renderer: THREE.WebGLRenderer) => void
-    dispose?: () => void
+    scene  : THREE.Scene
+    camera : THREE.Camera
+    objects: Set<DisplayObject.IDisplayObject>
+    render : (renderer: THREE.WebGLRenderer) => void
+    dispose: () => void
 }
 
 export const setCameraSize = (camera: THREE.Camera, width: number, height: number) => {

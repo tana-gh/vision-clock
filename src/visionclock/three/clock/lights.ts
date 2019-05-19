@@ -1,15 +1,16 @@
 import * as THREE         from 'three'
+import * as Rx            from 'rxjs'
 import * as R             from 'ramda'
 import * as Animation     from '../../animation'
-import * as Interaction   from '../../interaction'
 import * as SceneState    from '../scenestate'
 import * as DisplayObject from '../displayobject'
 import * as C             from '../../utils/constants'
 
 export const create = (
+    timestamp : number,
+    animations: Rx.Observable<Animation.IAnimationState>,
     sceneState: SceneState.ISceneState,
-    parent    : THREE.Object3D,
-    timestamp : number
+    parent    : THREE.Object3D
 ): DisplayObject.IDisplayObject => {
     const lights = new THREE.Object3D()
     
@@ -20,43 +21,29 @@ export const create = (
     }, C.lightParams)
     
     const obj: DisplayObject.IDisplayObject = {
-        elements: {
+        rootElement: lights,
+        elements   : {
             lights
         },
-        sceneState,
-        parent,
         timestamp,
-        state: 'init'
+        state: 'init',
+        dispose() {
+            subscription.unsubscribe()
+        }
     }
 
-    obj.updateByAnimation   = updateByAnimation  (obj)
-    obj.updateByInteraction = updateByInteraction(obj)
-    obj.updateByTime        = updateByTime       (obj)
-    obj.dispose             = dispose            (obj)
+    const subscription = animations.subscribe(
+        DisplayObject.updateByAnimation(obj, sceneState, parent, 'main', updateByAnimation)
+    )
 
     return obj
 }
 
-const updateByAnimation = (obj: DisplayObject.IDisplayObject) => (animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
     switch (obj.state) {
-        case 'init':
-            obj.state = 'main'
-            updateByAnimation(obj)(animation)
-            return
         case 'main':
-            return
-        case 'terminate':
             return
         default:
             throw 'Invalid state'
     }
-}
-
-const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interaction: Interaction.IInteraction) => {
-}
-
-const updateByTime = (obj: DisplayObject.IDisplayObject) => (time: Date) => {
-}
-
-const dispose = (obj: DisplayObject.IDisplayObject) => () => {
 }

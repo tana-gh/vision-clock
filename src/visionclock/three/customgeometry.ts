@@ -1,13 +1,24 @@
 import * as THREE from 'three'
 import * as R     from 'ramda'
 
-export const create = (vertices: number[], indices: number[]) => {
+export const create = (
+    vertices      : number[],
+    indices       : number[],
+    attributes   ?: { [name: string]: number[] },
+    attributeDims?: { [name: string]: number   }
+) => {
     const geometry = new THREE.BufferGeometry()
-    const vs       = createVertices(vertices, indices)
-    const normals  = createNormals (vertices, indices)
+    
+    const vs = createVertices(vertices, indices)
+    geometry.addAttribute('position', vs)
 
-    geometry.addAttribute('position', new THREE.Float32BufferAttribute(vs     , 3))
-    geometry.addAttribute('normal'  , new THREE.Float32BufferAttribute(normals, 3))
+    const ns = createNormals(vertices, indices)
+    geometry.addAttribute('normal'  , ns)
+
+    if (attributes && attributeDims) {
+        const attrs = createAttributes(attributes, attributeDims, indices)
+        R.forEachObjIndexed((attr, name) => geometry.addAttribute(name, attr))(attrs)
+    }
 
     return geometry
 }
@@ -17,7 +28,8 @@ const createVertices = (vertices: number[], indices: number[]) => {
 
     return R.pipe(
         R.map((i: number) => vss[i]),
-        v => R.flatten<number>(v)
+        vss => R.flatten<number>(vss),
+        vs  => new THREE.Float32BufferAttribute(vs, 3)
     )(indices)
 }
 
@@ -31,6 +43,28 @@ const createNormals = (vertices: number[], indices: number[]) => {
         R.map((vs: THREE.Vector3[]) => vs[1].sub(vs[0]).cross(vs[2].sub(vs[0])).normalize()),
         R.map(n => [n.x, n.y, n.z]),
         R.chain(n => [n, n, n]),
-        n => R.flatten<number>(n)
+        nss => R.flatten<number>(nss),
+        ns  => new THREE.Float32BufferAttribute(ns, 3)
+    )(indices)
+}
+
+const createAttributes = (
+    attributes   : { [name: string]: number[] },
+    attributeDims: { [name: string]: number   },
+    indices      : number[]
+) => {
+    return R.pipe(
+        R.mapObjIndexed((attr, name) => <[number[], number]>[attr, attributeDims[name]]),
+        R.mapObjIndexed(z => createOneAttribute(z[0], z[1], indices))
+    )(attributes)
+}
+
+const createOneAttribute = (values: number[], dim: number, indices: number[]) => {
+    const vss = R.splitEvery(dim, values)
+
+    return R.pipe(
+        R.map((i: number) => vss[i]),
+        vss => R.flatten<number>(vss),
+        vs  => new THREE.Float32BufferAttribute(vs, dim)
     )(indices)
 }

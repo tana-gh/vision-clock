@@ -1,4 +1,5 @@
 import * as THREE          from 'three'
+import * as Rx             from 'rxjs'
 import * as R              from 'ramda'
 import * as Animation      from '../../animation'
 import * as Interaction    from '../../interaction'
@@ -8,9 +9,12 @@ import * as CustomGeometry from '../customgeometry'
 import * as C              from '../../utils/constants'
 
 export const create = (
-    sceneState: SceneState.ISceneState,
-    parent    : THREE.Object3D,
-    timestamp : number,
+    timestamp   : number,
+    animations  : Rx.Observable<Animation.IAnimationState>,
+    interactions: Rx.Observable<Interaction.IInteraction[]>,
+    times       : Rx.Observable<Date>,
+    sceneState  : SceneState.ISceneState,
+    parent      : THREE.Object3D,
     {
         radius,
         hourHandLength,
@@ -41,30 +45,40 @@ export const create = (
     const frame      = createFrame(frameRadius, frameZ, frameSegments, frameOpacity, material[0])
     const clock      = new THREE.Object3D().add(hourHand[0], minuteHand[0], secondHand[0], scales[0], frame[0])
     const obj: DisplayObject.IDisplayObject = {
-        elements: {
-            clock,
+        rootElement: clock,
+        elements   : {
             hourHand  : hourHand  [0],
             minuteHand: minuteHand[0],
             secondHand: secondHand[0],
-            scales    : scales    [0]
+            scales    : scales    [0],
+            frame     : frame     [0]
         },
-        sceneState,
-        parent,
         timestamp,
-        state: 'init'
+        state: 'init',
+        dispose() {
+            R.juxt([
+                () => R.forEach((s: Rx.Subscription) => s.unsubscribe())(subscriptions),
+                material  [1],
+                hourHand  [1],
+                minuteHand[1],
+                secondHand[1],
+                scales    [1],
+                frame     [1]
+            ])()
+        }
     }
 
-    obj.updateByAnimation   = updateByAnimation  (obj),
-    obj.updateByInteraction = updateByInteraction(obj),
-    obj.updateByTime        = updateByTime       (obj),
-    obj.dispose = () => R.juxt([
-        material  [1],
-        hourHand  [1],
-        minuteHand[1],
-        secondHand[1],
-        scales    [1],
-        frame     [1]
-    ])()
+    const subscriptions = [
+        animations.subscribe(
+            DisplayObject.updateByAnimation(obj, sceneState, parent, 'main', updateByAnimation)
+        ),
+        interactions.subscribe(
+            updateByInteraction(obj)
+        ),
+        times.subscribe(
+            updateByTime(obj)
+        ),
+    ]
     
     return obj
 }
@@ -141,31 +155,27 @@ const createFrame = (
     ]
 }
 
-const updateByAnimation = (obj: DisplayObject.IDisplayObject) => (animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
     switch (obj.state) {
-        case 'init':
-            obj.state = 'main'
-            updateByAnimation(obj)(animation)
-            return
         case 'main':
-            return
-        case 'terminate':
             return
         default:
             throw 'Invalid state'
     }
 }
 
-const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interaction: Interaction.IInteraction) => {
+const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interactions: Interaction.IInteraction[]) => {
     switch (obj.state) {
         case 'init':
             return
         case 'main':
-            const axis = interaction.position
-                 .clone()
-                 .cross(new THREE.Vector3(0.0, 0.0, -1.0))
-                 .normalize()
-            obj.elements.clock.setRotationFromAxisAngle(axis, interaction.position.length() * C.clockRotationAngle)
+            R.forEach((i: Interaction.IInteraction) => {
+                const axis = i.position
+                    .clone()
+                    .cross(new THREE.Vector3(0.0, 0.0, -1.0))
+                    .normalize()
+                obj.rootElement.setRotationFromAxisAngle(axis, i.position.length() * C.clockRotationAngle)
+            })(interactions)
             return
         case 'terminate':
             return

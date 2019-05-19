@@ -6,31 +6,38 @@ import * as SceneState from './scenestate'
 export interface IRendererState {
     renderer: THREE.WebGLRenderer
     scenes  : Set<SceneState.ISceneState>
-    render ?: (animationState: Animation.IAnimationState) => void
-    resize ?: (width: number, height: number) => void
-    dispose?: () => void
+    render  : (animationState: Animation.IAnimationState) => void
+    resize  : (width: number, height: number) => void
+    dispose : () => void
 }
 
-export const create = (width: number, height: number, scenes: SceneState.ISceneState[]) => {
+export const create = (
+    width : number,
+    height: number,
+    scenes: SceneState.ISceneState[]
+): IRendererState => {
     const renderer = new THREE.WebGLRenderer()
-
-    const rendererState: IRendererState = {
-        renderer,
-        scenes: new Set(scenes)
-    }
-
+    
     renderer.setClearColor(new THREE.Color(0.0, 0.0, 0.0), 0.0)
     renderer.setSize(width, height)
     renderer.autoClear = false
 
-    rendererState.render  = render (rendererState)
-    rendererState.resize  = resize (rendererState)
-    rendererState.dispose = dispose(rendererState)
-
-    return rendererState
+    return {
+        renderer,
+        scenes: new Set(scenes),
+        render(animationState) {
+            render(this, animationState)
+        },
+        resize(width, height) {
+            resize(this, width, height)
+        },
+        dispose() {
+            dispose(this)
+        }
+    }
 }
 
-const resize = (rendererState: IRendererState) => (width: number, height: number) => {
+const resize = (rendererState: IRendererState, width: number, height: number) => {
     setStyle(rendererState.renderer.domElement, width, height)
     setRendererSize(rendererState)
 }
@@ -44,23 +51,22 @@ const setRendererSize = (rendererState: IRendererState) => {
     const canvas = rendererState.renderer.domElement
     const w = canvas.clientWidth
     const h = canvas.clientHeight
-
+    
     if (w != canvas.width || h != canvas.height) {
         rendererState.renderer.setSize(w, h)
         R.forEach(
             (s: SceneState.ISceneState) => SceneState.setCameraSize(s.camera, w, h)
-        )([...rendererState.scenes])
+        )(Array.from(rendererState.scenes))
     }
 }
 
-const render = (rendererState: IRendererState) =>
-(animationState: Animation.IAnimationState) => {
+const render = (rendererState: IRendererState, animationState: Animation.IAnimationState) => {
     R.forEach(
-        (s: SceneState.ISceneState) => s.render!(rendererState.renderer)
-    )([...rendererState.scenes])
+        (s: SceneState.ISceneState) => s.render(rendererState.renderer)
+    )(Array.from(rendererState.scenes))
 }
 
-const dispose = (rendererState: IRendererState) => () => {
+const dispose = (rendererState: IRendererState) => {
     rendererState.renderer.dispose()
-    R.forEach((s: SceneState.ISceneState) => s.dispose!())([...rendererState.scenes])
+    R.forEach((s: SceneState.ISceneState) => s.dispose())(Array.from(rendererState.scenes))
 }
