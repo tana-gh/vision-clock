@@ -4,7 +4,7 @@ import * as Animation      from '../../animation'
 import * as SceneState     from '../scenestate'
 import * as DisplayObject  from '../displayobject'
 import * as CustomGeometry from '../customgeometry'
-import * as ShaderMaterial from '../shadermaterial'
+import * as C              from '../../utils/constants'
 
 export interface IShaderObject extends DisplayObject.IDisplayObject {
     setUniform: (name: string, value: any) => void
@@ -24,16 +24,8 @@ export const create = (
     attributeDims    : { [name: string]: number   },
     material         : THREE.Material
 ) => {
-    const vertices = [
-        -0.5, -0.5, 0.0,
-         0.5, -0.5, 0.0,
-         0.5,  0.5, 0.0,
-        -0.5,  0.5, 0.0
-    ]
-    const indices = [
-        0, 1, 2,
-        0, 2, 3
-    ]
+    const vertices = C.shaderObjectVertices
+    const indices  = C.shaderObjectIndices
     const geometry  = CustomGeometry.create(vertices, indices, attributes, attributeDims)
     const rectangle = new THREE.Mesh(geometry, material)
     rectangle.scale   .set(width, height, 1.0)

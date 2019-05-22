@@ -1,20 +1,13 @@
-import * as THREE                 from 'three'
-import * as Rx                    from 'rxjs'
-import * as R                     from 'ramda'
-import * as Animation             from '../../animation'
-import * as Interaction           from '../../interaction'
-import * as SceneState            from '../scenestate'
-import * as DisplayObject         from '../displayobject'
-import * as MovingCircleGenerator from './movingcirclegenerator'
-import * as Random                from '../../utils/random'
+import * as THREE         from 'three'
+import * as R             from 'ramda'
+import * as SceneState    from '../scenestate'
+import * as DisplayObject from '../displayobject'
 
 export const create = (
-    width       : number,
-    height      : number,
-    animations  : Rx.Observable<Animation.IAnimationState>,
-    interactions: Rx.Observable<Interaction.IInteraction[]>,
-    times       : Rx.Observable<Date>,
-    random      : Random.IRandom
+    width     : number,
+    height    : number,
+    createFunc: (sceneState: SceneState.ISceneState, parent: THREE.Object3D) => void,
+    clearDepth: boolean
 ) => {
     const aspect = width / height
     const scene  = new THREE.Scene()
@@ -32,29 +25,26 @@ export const create = (
         camera,
         objects: new Set(),
         render(renderer) {
-            render(this, renderer)
+            render(this, renderer, clearDepth)
         },
         dispose() {
             dispose(this)
         }
     }
 
-    const now = Date.now()
-
-    MovingCircleGenerator.create(
-        now,
-        animations,
-        random,
-        sceneState,
-        scene,
-        width,
-        height
-    )
+    createFunc(sceneState, scene)
 
     return sceneState
 }
 
-const render = (sceneState: SceneState.ISceneState, renderer: THREE.WebGLRenderer) => {
+const render = (
+    sceneState: SceneState.ISceneState,
+    renderer  : THREE.WebGLRenderer,
+    clearDepth: boolean
+) => {
+    if (clearDepth) {
+        renderer.clearDepth()
+    }
     renderer.render(sceneState.scene, sceneState.camera)
 }
 

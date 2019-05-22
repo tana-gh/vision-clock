@@ -115,3 +115,43 @@ export const lightParams = [
     { color: 0x888844, x:  0.0, y: -3.0, z: 0.5 },
     { color: 0xCCCCCC, x:  0.0, y:  2.0, z: 0.0 }
 ]
+
+export const shaderObjectVertices = [
+    -0.5, -0.5, 0.0,
+     0.5, -0.5, 0.0,
+     0.5,  0.5, 0.0,
+    -0.5,  0.5, 0.0
+]
+
+export const shaderObjectIndices = [
+    0, 1, 2,
+    0, 2, 3
+]
+
+export const shaderObjectParams = {
+    a_coord: [
+        -1.0, -1.0, 0.0, 1.0,
+         1.0, -1.0, 0.0, 1.0,
+         1.0,  1.0, 0.0, 1.0,
+        -1.0,  1.0, 0.0, 1.0
+    ],
+    a_coordDim: 4
+}
+
+export const framePerMillisecond = 60.0 * 0.001
+
+export const movingCircleGeneratorParams = {
+    u_rinner  : 0.8,
+    u_router  : 1.0,
+    limitWidth: 0.8,
+    maxSpeed  : 0.003,
+    minSpeed  : 0.001,
+    maxRadius : 0.4,
+    minRadius : 0.1,
+    sAngular  : 0.0015,
+    sAmp      : 0.2,
+    sScalar   : 0.8,
+    lAngular  : 0.001,
+    lAmp      : 0.3,
+    lScalar   : 0.3
+}

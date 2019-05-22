@@ -2,7 +2,8 @@ import * as Animation        from './animation'
 import * as Interaction      from './interaction'
 import * as Time             from './time'
 import * as RendererState    from './three/rendererstate'
-import * as ShaderSceneState from './three/bg/shaderscenestate'
+import * as BgSceneState     from './three/bg/bgscenestate'
+import * as ObjectSceneState from './three/bg/objectscenestate'
 import * as ClockSceneState  from './three/clock/clockscenestate'
 import * as Random           from './utils/random'
 
@@ -19,9 +20,19 @@ export const load = (parent: HTMLElement): IVisionClockState => {
     const random       = Random     .create(now)
 
     const [width, height]  = [parent.clientWidth, parent.clientHeight]
-    const shaderSceneState = ShaderSceneState.create(width, height, animations, interactions, times, random)
+    const bgSceneState     = BgSceneState    .create(width, height, animations, interactions, times, random)
+    const objectSceneState = ObjectSceneState.create(width, height, animations, interactions, times, random)
     const clockSceneState  = ClockSceneState .create(width, height, animations, interactions, times, random)
-    const rendererState    = RendererState   .create(width, height, [ shaderSceneState, clockSceneState ])
+    
+    const rendererState = RendererState.create(
+        width,
+        height,
+        [
+            bgSceneState,
+            objectSceneState,
+            clockSceneState
+        ]
+    )
 
     const subscription = animations.subscribe(a => rendererState.render(a))
 
