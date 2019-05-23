@@ -3,6 +3,7 @@ import * as Rx             from 'rxjs'
 import * as RxOp           from 'rxjs/operators'
 import * as R              from 'ramda'
 import * as Animation      from '../../animation'
+import * as RendererState  from '../rendererstate'
 import * as SceneState     from '../scenestate'
 import * as Behaviour      from '../behaviour'
 import * as ShaderMaterial from '../shadermaterial'
@@ -18,8 +19,7 @@ export const create = (
     random    : Random.IRandom,
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
-    width     : number,
-    height    : number
+    aspectObj : RendererState.IAspect
 ) => {
     const generator: Behaviour.IBehaviour = {
         timestamp,
@@ -53,8 +53,7 @@ export const create = (
                 sceneState,
                 parent,
                 material,
-                width,
-                height
+                aspectObj
             )
         )
     )
@@ -66,8 +65,7 @@ const updateByAnimation = (
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     material  : THREE.Material,
-    width     : number,
-    height    : number
+    aspectObj : RendererState.IAspect
 ) => (obj: Behaviour.IBehaviour, animation: Animation.IAnimationState) => {
     switch (obj.state) {
         case 'main':
@@ -79,7 +77,7 @@ const updateByAnimation = (
                     parent,
                     material.clone(),
                     new THREE.Vector3(
-                        -width / height * C.movingCircleGeneratorParams.limitWidth,
+                        -aspectObj.value * C.movingCircleGeneratorParams.limitWidth,
                         random.next() - 0.5,
                         0.0
                     ),
@@ -115,7 +113,7 @@ const updateByAnimation = (
                     })(new THREE.Color().setHSL(random.next(), 1.0, 0.99)),
                     () => 1.0,
                     (o, a) => {
-                        return o.rootElement.position.x < width / height * C.movingCircleGeneratorParams.limitWidth
+                        return o.rootElement.position.x < aspectObj.value * C.movingCircleGeneratorParams.limitWidth
                     }
                 )
             })(R.range(1, 3))

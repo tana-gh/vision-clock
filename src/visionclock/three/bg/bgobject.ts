@@ -1,6 +1,7 @@
 import * as THREE         from 'three'
 import * as Rx            from 'rxjs'
 import * as Animation     from '../../animation'
+import * as RendererState from '../rendererstate'
 import * as SceneState    from '../scenestate'
 import * as DisplayObject from '../displayobject'
 import * as ShaderObject  from './shaderobject'
@@ -11,8 +12,7 @@ export const create = (
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     material  : THREE.Material,
-    width     : number,
-    height    : number,
+    aspectObj : RendererState.IAspect,
     color     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
     alpha     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number,
 ) => {
@@ -24,14 +24,14 @@ export const create = (
         sceneState,
         parent,
         new THREE.Vector3(0.0, 0.0, 0.0),
-        width,
-        height,
+        aspectObj.value,
+        1.0,
         {
             a_coord: [
-                -width, -height, 0.0, 1.0,
-                 width, -height, 0.0, 1.0,
-                 width,  height, 0.0, 1.0,
-                -width,  height, 0.0, 1.0
+                -aspectObj.value, -1.0, 0.0, 1.0,
+                 aspectObj.value, -1.0, 0.0, 1.0,
+                 aspectObj.value,  1.0, 0.0, 1.0,
+                -aspectObj.value,  1.0, 0.0, 1.0
             ]
         },
         {

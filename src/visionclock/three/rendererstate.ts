@@ -1,20 +1,26 @@
 import * as THREE      from 'three'
+import * as Rx         from 'rxjs'
 import * as R          from 'ramda'
 import * as Animation  from '../animation'
 import * as SceneState from './scenestate'
 
 export interface IRendererState {
-    renderer: THREE.WebGLRenderer
-    scenes  : Set<SceneState.ISceneState>
-    render  : (animationState: Animation.IAnimationState) => void
-    resize  : (width: number, height: number) => void
-    dispose : () => void
+    renderer : THREE.WebGLRenderer
+    scenes   : Set<SceneState.ISceneState>
+    aspectObj: IAspect
+    render   : (animationState: Animation.IAnimationState) => void
+    resize   : (width: number, height: number) => void
+    dispose  : () => void
+}
+
+export interface IAspect {
+    value     : number
+    observable: Rx.Observable<number>
 }
 
 export const create = (
     width : number,
-    height: number,
-    scenes: SceneState.ISceneState[]
+    height: number
 ): IRendererState => {
     const renderer = new THREE.WebGLRenderer()
     
@@ -24,7 +30,11 @@ export const create = (
 
     return {
         renderer,
-        scenes: new Set(scenes),
+        scenes   : new Set(),
+        aspectObj: {
+            value     : width / height,
+            observable: new Rx.BehaviorSubject<number>(width / height)
+        },
         render(animationState) {
             render(this, animationState)
         },
@@ -37,9 +47,17 @@ export const create = (
     }
 }
 
+export const setScenes = (renderer: IRendererState, ...scenes: SceneState.ISceneState[]) => {
+    R.forEach((s: SceneState.ISceneState) => renderer.scenes.add(s))(scenes)
+}
+
 const resize = (rendererState: IRendererState, width: number, height: number) => {
     setStyle(rendererState.renderer.domElement, width, height)
     setRendererSize(rendererState)
+    
+    rendererState.aspectObj.value = width / height
+    const subject = <Rx.Subject<number>>rendererState.aspectObj.observable
+    subject.next(width / height)
 }
 
 const setStyle = (element: HTMLElement, width: number, height: number) => {
@@ -54,8 +72,9 @@ const setRendererSize = (rendererState: IRendererState) => {
     
     if (w != canvas.width || h != canvas.height) {
         rendererState.renderer.setSize(w, h)
+        const aspect = w / h
         R.forEach(
-            (s: SceneState.ISceneState) => SceneState.setCameraSize(s.camera, w, h)
+            (s: SceneState.ISceneState) => SceneState.setCameraSize(s.camera, aspect)
         )(Array.from(rendererState.scenes))
     }
 }

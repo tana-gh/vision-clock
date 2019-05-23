@@ -19,19 +19,21 @@ export const load = (parent: HTMLElement): IVisionClockState => {
     const times        = Time       .create(animations)
     const random       = Random     .create(now)
 
-    const [width, height]  = [parent.clientWidth, parent.clientHeight]
-    const bgSceneState     = BgSceneState    .create(width, height, animations, interactions, times, random)
-    const objectSceneState = ObjectSceneState.create(width, height, animations, interactions, times, random)
-    const clockSceneState  = ClockSceneState .create(width, height, animations, interactions, times, random)
-    
-    const rendererState = RendererState.create(
+    const [width, height] = [parent.clientWidth, parent.clientHeight]
+    const rendererState   = RendererState.create(
         width,
-        height,
-        [
-            bgSceneState,
-            objectSceneState,
-            clockSceneState
-        ]
+        height
+    )
+    
+    const bgSceneState     = BgSceneState    .create(animations, interactions, times, random, rendererState.aspectObj)
+    const objectSceneState = ObjectSceneState.create(animations, interactions, times, random, rendererState.aspectObj)
+    const clockSceneState  = ClockSceneState .create(animations, interactions, times, random, rendererState.aspectObj)
+    
+    RendererState.setScenes(
+        rendererState,
+        bgSceneState,
+        objectSceneState,
+        clockSceneState
     )
 
     const subscription = animations.subscribe(a => rendererState.render(a))

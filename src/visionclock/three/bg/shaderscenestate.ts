@@ -1,23 +1,23 @@
 import * as THREE         from 'three'
 import * as R             from 'ramda'
+import * as RendererState from '../rendererstate'
 import * as SceneState    from '../scenestate'
 import * as DisplayObject from '../displayobject'
+import * as C             from '../../utils/constants'
 
 export const create = (
-    width     : number,
-    height    : number,
+    aspectObj : RendererState.IAspect,
     createFunc: (sceneState: SceneState.ISceneState, parent: THREE.Object3D) => void,
     clearDepth: boolean
 ) => {
-    const aspect = width / height
     const scene  = new THREE.Scene()
     const camera = new THREE.OrthographicCamera(
-        -aspect * 0.5,
-         aspect * 0.5,
+        -aspectObj.value * 0.5,
+         aspectObj.value * 0.5,
          0.5,
         -0.5,
-        -100.0,
-         100.0
+        C.orthographicParams.near,
+        C.orthographicParams.far
     )
 
     const sceneState: SceneState.ISceneState = {

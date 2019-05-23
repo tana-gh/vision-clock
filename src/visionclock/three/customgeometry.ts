@@ -48,7 +48,7 @@ const createNormals = (vertices: number[], indices: number[]) => {
     )(indices)
 }
 
-const createAttributes = (
+export const createAttributes = (
     attributes   : { [name: string]: number[] },
     attributeDims: { [name: string]: number   },
     indices      : number[]

@@ -3,6 +3,7 @@ import * as R             from 'ramda'
 import * as Rx            from 'rxjs'
 import * as Animation     from '../../animation'
 import * as Interaction   from '../../interaction'
+import * as RendererState from '../rendererstate'
 import * as SceneState    from '../scenestate'
 import * as DisplayObject from '../displayobject'
 import * as ClockObject   from './clockobject'
@@ -11,18 +12,17 @@ import * as C             from '../../utils/constants'
 import * as Random        from '../../utils/random'
 
 export const create = (
-    width       : number,
-    height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction[]>,
     times       : Rx.Observable<Date>,
-    random      : Random.IRandom
+    random      : Random.IRandom,
+    aspectObj   : RendererState.IAspect
 ): SceneState.ISceneState => {
     const scene  = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera
     (
         C.perspectiveParams.fov,
-        width / height,
+        aspectObj.value,
         C.perspectiveParams.near,
         C.perspectiveParams.far
     )

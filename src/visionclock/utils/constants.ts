@@ -3,6 +3,11 @@ export const visionClockClass = 'visionclock'
 
 export const timerPeriod = 10
 
+export const orthographicParams = {
+    near: -100.0,
+    far :  100.0
+}
+
 export const perspectiveParams = {
     fov : 30.0,
     near: 0.1,

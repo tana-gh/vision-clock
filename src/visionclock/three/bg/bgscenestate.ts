@@ -1,21 +1,20 @@
 import * as Rx               from 'rxjs'
 import * as Animation        from '../../animation'
 import * as Interaction      from '../../interaction'
+import * as RendererState    from '../rendererstate'
 import * as ShaderSceneState from './shaderscenestate'
 import * as BgGenerator      from './bggenerator'
 import * as Random           from '../../utils/random'
 
 export const create = (
-    width       : number,
-    height      : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
     interactions: Rx.Observable<Interaction.IInteraction[]>,
     times       : Rx.Observable<Date>,
-    random      : Random.IRandom
+    random      : Random.IRandom,
+    aspectObj   : RendererState.IAspect
 ) => {
     return ShaderSceneState.create(
-        width,
-        height,
+        aspectObj,
         (sceneState, scene) => {
             BgGenerator.create(
                 Date.now(),
@@ -23,8 +22,7 @@ export const create = (
                 random,
                 sceneState,
                 scene,
-                width,
-                height
+                aspectObj
             )
         },
         false
