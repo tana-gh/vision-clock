@@ -20,7 +20,7 @@ export const create = (
         timestamp,
         animations,
         'main',
-        updateByAnimation(color, alpha),
+        updateByAnimation(aspectObj, color, alpha),
         sceneState,
         parent,
         new THREE.Vector3(0.0, 0.0, 0.0),
@@ -42,14 +42,17 @@ export const create = (
 }
 
 const updateByAnimation = (
-    color: (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
-    alpha: (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number
+    aspectObj: RendererState.IAspect,
+    color    : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
+    alpha    : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number
 ) => (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
     const sobj = <ShaderObject.IShaderObject>obj
     
     switch (sobj.state) {
         case 'main':
             {
+                sobj.setUniform('u_aspect', aspectObj.value)
+
                 const c = color(sobj, animation)
                 const a = alpha(sobj, animation)
                 sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])

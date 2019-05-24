@@ -31,6 +31,7 @@ export const create = (
         BgShader.vertexShader,
         BgShader.fragmentShader,
         {
+            u_aspect: 0.0,
             u_color : [0.0, 0.0, 0.0, 0.0]
         }
     )
@@ -50,7 +51,7 @@ export const create = (
                     parent,
                     material,
                     aspectObj,
-                    (c => () => c)(new THREE.Color().setRGB(0.2, 0.1, 0.4)),
+                    (c => () => c)(new THREE.Color().setRGB(0.0, 0.6, 0.6)),
                     () => 1.0
                 )
             }
