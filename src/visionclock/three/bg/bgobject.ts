@@ -5,6 +5,7 @@ import * as RendererState from '../rendererstate'
 import * as SceneState    from '../scenestate'
 import * as DisplayObject from '../displayobject'
 import * as ShaderObject  from './shaderobject'
+import * as C             from '../../utils/constants'
 
 export const create = (
     timestamp : number,
@@ -45,7 +46,7 @@ const updateByAnimation = (
     aspectObj: RendererState.IAspect,
     color    : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
     alpha    : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number
-) => (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
+) => (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState, store: any) => {
     const sobj = <ShaderObject.IShaderObject>obj
     
     switch (sobj.state) {
@@ -55,7 +56,14 @@ const updateByAnimation = (
 
                 const c = color(sobj, animation)
                 const a = alpha(sobj, animation)
-                sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
+
+                const bgColor = c.clone().multiplyScalar(C.bgObjectParams.bgLightness)
+                sobj.setUniform('u_bgcolor' , [ bgColor.r, bgColor.g, bgColor.b, a ])
+
+                const arcColor = c.clone()
+                const hsl      = arcColor.getHSL({ h: 0.0, s: 0.0, l: 0.0 })
+                arcColor.setHSL(hsl.h + C.bgObjectParams.arcHue, hsl.s, hsl.l)
+                sobj.setUniform('u_arccolor', [ arcColor.r, arcColor.g, arcColor.b, a ])
             }
             return
         default:

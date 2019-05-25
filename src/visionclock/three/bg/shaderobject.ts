@@ -14,7 +14,7 @@ export const create = (
     timestamp        : number,
     animations       : Rx.Observable<Animation.IAnimationState>,
     initialState     : string,
-    updateByAnimation: (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => void,
+    updateByAnimation: (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState, store: any) => void,
     sceneState       : SceneState.ISceneState,
     parent           : THREE.Object3D,
     position         : THREE.Vector3,
@@ -50,8 +50,10 @@ export const create = (
         }
     }
 
+    const store = {}
+
     const subscription = animations.subscribe(
-        DisplayObject.updateByAnimation(obj, sceneState, parent, initialState, updateByAnimation)
+        DisplayObject.updateByAnimation(obj, sceneState, parent, initialState, store, updateByAnimation)
     )
 
     return obj

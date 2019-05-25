@@ -5,10 +5,12 @@ import * as Animation      from '../../animation'
 import * as RendererState  from '../rendererstate'
 import * as SceneState     from '../scenestate'
 import * as Behaviour      from '../behaviour'
+import * as DisplayObject  from '../displayobject'
 import * as ShaderMaterial from '../shadermaterial'
 import * as ShaderObject   from './shaderobject'
 import * as BgObject       from './bgobject'
 import * as BgShader       from './bgshader'
+import * as C              from '../../utils/constants'
 import * as Random         from '../../utils/random'
 
 export const create = (
@@ -31,18 +33,28 @@ export const create = (
         BgShader.vertexShader,
         BgShader.fragmentShader,
         {
-            u_aspect: 0.0,
-            u_color : [0.0, 0.0, 0.0, 0.0]
+            u_aspect  : 0.0,
+            u_radius  : C.bgGeneratorParams.u_radius,
+            u_arcy    : C.bgGeneratorParams.u_arcy,
+            u_powinner: C.bgGeneratorParams.u_powinner,
+            u_powouter: C.bgGeneratorParams.u_powouter,
+            u_bgcolor : [0.0, 0.0, 0.0, 0.0],
+            u_arccolor: [0.0, 0.0, 0.0, 0.0],
+            u_white   : C.bgGeneratorParams.u_white
         }
     )
 
     let bgObj: ShaderObject.IShaderObject | undefined
+    const store = {}
+
     const subscriptions = [
         aspectObj.observable.subscribe(
             () => {
                 if (bgObj) {
                     bgObj.state = 'terminate'
                 }
+
+                let prevTime = 0.0
 
                 bgObj = BgObject.create(
                     Date.now(),
@@ -51,35 +63,35 @@ export const create = (
                     parent,
                     material,
                     aspectObj,
-                    (c => () => c)(new THREE.Color().setRGB(0.0, 0.6, 0.6)),
+                    ((c1, c2) => (o: DisplayObject.IDisplayObject, a: Animation.IAnimationState) => {
+                        const time =
+                            DisplayObject.getTime(o, a) %
+                            C.bgGeneratorParams.colorFreq /
+                            C.bgGeneratorParams.colorFreq
+                        if (time < prevTime) {
+                            c1.set(c2)
+                            c2.setRGB(random.next(), random.next(), random.next())
+                        }
+                        prevTime = time
+                        return c1.clone().lerpHSL(c2, time)
+                    })(
+                        new THREE.Color().setRGB(random.next(), random.next(), random.next()),
+                        new THREE.Color().setRGB(random.next(), random.next(), random.next())
+                    ),
                     () => 1.0
                 )
             }
         ),
 
         animations.subscribe(
-            Behaviour.updateByAnimation(
-                generator, 'main', updateByAnimation(
-                    animations,
-                    random,
-                    sceneState,
-                    parent,
-                    material,
-                    aspectObj
-                )
-            )
+            Behaviour.updateByAnimation(generator, 'main', store, updateByAnimation)
         )
     ]
+
+    return generator
 }
 
-const updateByAnimation = (
-    animations: Rx.Observable<Animation.IAnimationState>,
-    random    : Random.IRandom,
-    sceneState: SceneState.ISceneState,
-    parent    : THREE.Object3D,
-    material  : THREE.Material,
-    aspectObj : RendererState.IAspect
-) => (obj: Behaviour.IBehaviour, animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: Behaviour.IBehaviour, animation: Animation.IAnimationState, store: any) => {
     switch (obj.state) {
         case 'main':
             return

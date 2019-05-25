@@ -22,7 +22,7 @@ export const create = (
     return ShaderObject.create(
         timestamp,
         animations,
-        'main',
+        'fade-in',
         updateByAnimation(velocity, scale, color, alpha, isAlive),
         sceneState,
         parent,
@@ -45,24 +45,72 @@ const updateByAnimation = (
     color   : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
     alpha   : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number,
     isAlive : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => boolean
-) => (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
+) => (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState, store: any) => {
     const sobj = <ShaderObject.IShaderObject>obj
     
-    switch (sobj.state) {
-        case 'main':
+    switch (obj.state) {
+        case 'fade-in':
             {
-                sobj.rootElement.position.add(velocity(obj, animation))
-                if (!isAlive(sobj, animation)) {
-                    sobj.state = 'terminate'
+                const time = DisplayObject.getTime(obj, animation)
+
+                obj.rootElement.position.add(velocity(obj, animation))
+                if (!isAlive(obj, animation)) {
+                    obj.state = 'terminate'
                     return
                 }
 
                 const s = scale(obj, animation)
-                sobj.rootElement.scale.set(s, s, s)
+                obj.rootElement.scale.set(s, s, s)
 
-                const c = color(sobj, animation)
-                const a = alpha(sobj, animation)
+                const c = color(obj, animation).clone().multiplyScalar(time / C.movingObjectParams.fadeInTime)
+                const a = alpha(obj, animation)
                 sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
+
+                if (time > C.movingObjectParams.fadeInTime) {
+                    obj.state = 'main'
+                }
+            }
+            return
+        case 'main':
+            {
+                obj.rootElement.position.add(velocity(obj, animation))
+                if (!isAlive(obj, animation)) {
+                    obj.state = 'terminate'
+                    return
+                }
+
+                const s = scale(obj, animation)
+                obj.rootElement.scale.set(s, s, s)
+
+                const c = color(obj, animation)
+                const a = alpha(obj, animation)
+                sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
+            }
+            return
+        case 'fade-out':
+            {
+                if (store.beginTime === undefined) {
+                    store.beginTime = DisplayObject.getTime(obj, animation)
+                }
+
+                const time = DisplayObject.getTime(obj, animation) - store.beginTime
+
+                obj.rootElement.position.add(velocity(obj, animation))
+                if (!isAlive(obj, animation)) {
+                    obj.state = 'terminate'
+                    return
+                }
+
+                const s = scale(obj, animation)
+                obj.rootElement.scale.set(s, s, s)
+
+                const c = color(obj, animation).clone().multiplyScalar(1.0 - time / C.movingObjectParams.fadeOutTime)
+                const a = alpha(obj, animation)
+                sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
+
+                if (time > C.movingObjectParams.fadeOutTime) {
+                    obj.state = 'terminate'
+                }
             }
             return
         default:

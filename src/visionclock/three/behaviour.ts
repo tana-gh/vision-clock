@@ -9,18 +9,19 @@ export interface IBehaviour {
 export const updateByAnimation = (
     obj         : IBehaviour,
     initialState: string,
-    behaviour   : (obj: IBehaviour, animation: Animation.IAnimationState) => void
+    store       : any,
+    behaviour   : (obj: IBehaviour, animation: Animation.IAnimationState, store: any) => void
 ) => (animation: Animation.IAnimationState) => {
     switch (obj.state) {
         case 'init':
             obj.state = initialState
-            updateByAnimation(obj, initialState, behaviour)(animation)
+            updateByAnimation(obj, initialState, store, behaviour)(animation)
             return
         case 'terminate':
             obj.dispose()
             return
         default:
-            behaviour(obj, animation)
+            behaviour(obj, animation, store)
     }
 }
 

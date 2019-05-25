@@ -3,6 +3,7 @@ body {
     font-family: 'Noto Sans',
                  'Noto Sans JP';
     margin: 0;
+    background-color: black;
 }
 
 .wf-loading {

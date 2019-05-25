@@ -145,18 +145,58 @@ export const shaderObjectParams = {
 
 export const framePerMillisecond = 60.0 * 0.001
 
+export const bgGeneratorParams = {
+    u_radius  : 10.0,
+    u_arcy    : -0.5,
+    u_powinner: 1000.0,
+    u_powouter: 200.0,
+    u_white   : [0.4, 0.4, 0.4, 1.0],
+    colorFreq : 10000.0
+}
+
+export const bgObjectParams = {
+    bgLightness: 0.4,
+    arcHue     : -0.2
+}
+
 export const movingCircleGeneratorParams = {
     u_rinner  : 0.8,
     u_router  : 1.0,
-    limitWidth: 0.8,
-    maxSpeed  : 0.003,
-    minSpeed  : 0.001,
-    maxRadius : 0.4,
-    minRadius : 0.1,
-    sAngular  : 0.0015,
-    sAmp      : 0.2,
-    sScalar   : 0.8,
-    lAngular  : 0.001,
-    lAmp      : 0.3,
+    createFreq: 0.06,
+    yPosPow   : 3.0,
+    yPosMax   : 0.3,
+    xMaxSpeed : 0.0004,
+    xMinSpeed : 0.0001,
+    yMaxSpeed : 0.00004,
+    yMinSpeed : 0.00002,
+    yAngular  : 0.1,
+    radiusPow : 2.0,
+    maxRadius : 0.25,
+    minRadius : 0.05,
+    sAngular  : 0.2,
+    sAmp      : 0.1,
+    sScalar   : 0.3,
+    lAngular  : 0.6,
+    lAmp      : 0.25,
     lScalar   : 0.3
+}
+
+export const snowGeneratorParams = {
+    u_rinner  : 0.8,
+    u_router  : 1.0,
+    createFreq: 0.2,
+    xMaxSpeed : 0.00002,
+    xMinSpeed : 0.00001,
+    yMaxSpeed : 0.0003,
+    yMinSpeed : 0.0001,
+    yAngular  : 0.1,
+    radiusPow : 2.0,
+    maxRadius : 0.03,
+    minRadius : 0.01,
+    lightness : 0.6
+}
+
+export const movingObjectParams = {
+    fadeInTime : 1000.0,
+    fadeOutTime: 2000.0
 }

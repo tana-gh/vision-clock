@@ -68,9 +68,11 @@ export const create = (
         }
     }
 
+    const store = {}
+
     const subscriptions = [
         animations.subscribe(
-            DisplayObject.updateByAnimation(obj, sceneState, parent, 'main', updateByAnimation)
+            DisplayObject.updateByAnimation(obj, sceneState, parent, 'main', store, updateByAnimation)
         ),
         interactions.subscribe(
             updateByInteraction(obj)
@@ -155,7 +157,7 @@ const createFrame = (
     ]
 }
 
-const updateByAnimation = (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => {
+const updateByAnimation = (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState, store: any) => {
     switch (obj.state) {
         case 'main':
             return
