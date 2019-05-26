@@ -36,11 +36,7 @@ export const create = (
         RxOp.filter(i => i !== undefined),
     )(touchEvents)
 
-    const interactions = Rx.merge(mouseInteractions, touchInteractions)
-
-    return <Rx.Observable<IInteraction[]>>Rx.pipe(
-        RxOp.bufferToggle(animations, _ => animations)
-    )(interactions)
+    return Rx.merge(mouseInteractions, touchInteractions)
 }
 
 const getInteractionFromMouseEvent = (targetElement: HTMLElement | Window) => (e: MouseEvent) => {

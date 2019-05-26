@@ -46,6 +46,8 @@ export const create = (
 
     let bgObj: ShaderObject.IShaderObject | undefined
     const store = {}
+    const color1 = new THREE.Color(random.next(), random.next(), random.next())
+    const color2 = new THREE.Color(random.next(), random.next(), random.next())
 
     const subscriptions = [
         aspectObj.observable.subscribe(
@@ -63,28 +65,25 @@ export const create = (
                     parent,
                     material,
                     aspectObj,
-                    ((c1, c2) => (o: DisplayObject.IDisplayObject, a: Animation.IAnimationState) => {
+                    (o, a) => {
                         const time =
-                            DisplayObject.getTime(o, a) %
+                            a.total %
                             C.bgGeneratorParams.colorFreq /
                             C.bgGeneratorParams.colorFreq
                         if (time < prevTime) {
-                            c1.set(c2)
-                            c2.setRGB(random.next(), random.next(), random.next())
+                            color1.set(color2)
+                            color2.setRGB(random.next(), random.next(), random.next())
                         }
                         prevTime = time
-                        return c1.clone().lerpHSL(c2, time)
-                    })(
-                        new THREE.Color().setRGB(random.next(), random.next(), random.next()),
-                        new THREE.Color().setRGB(random.next(), random.next(), random.next())
-                    ),
+                        return color1.clone().lerpHSL(color2, time)
+                    },
                     () => 1.0
                 )
             }
         ),
 
         animations.subscribe(
-            Behaviour.updateByAnimation(generator, 'main', store, updateByAnimation)
+            Behaviour.updateByAnimation(generator, sceneState, 'main', store, updateByAnimation)
         )
     ]
 

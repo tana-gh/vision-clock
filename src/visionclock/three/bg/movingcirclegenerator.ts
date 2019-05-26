@@ -25,8 +25,10 @@ export const create = (
         state: 'init',
         dispose() {
             subscription.unsubscribe()
+            material.dispose()
         }
     }
+    sceneState.behaviours.add(generator)
 
     const material = ShaderMaterial.create(
         CircleShader.vertexShader,
@@ -49,7 +51,7 @@ export const create = (
     )(animations)
     .subscribe(
         Behaviour.updateByAnimation(
-            generator, 'main', store, updateByAnimation(
+            generator, sceneState, 'main', store, updateByAnimation(
                 animations,
                 random,
                 sceneState,

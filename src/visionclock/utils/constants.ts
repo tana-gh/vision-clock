@@ -200,3 +200,29 @@ export const movingObjectParams = {
     fadeInTime : 1000.0,
     fadeOutTime: 2000.0
 }
+
+export const forestGeneratorParams = {
+    u_rinner: 0.4,
+    u_router: 1.0,
+    velocity: 0.025,
+    objCount: 15,
+    depth   : 4,
+    interval: 5000.0
+}
+
+export const treeGeneratorParams = {
+    createFreq  : 1.0,
+    maxRadius   : 0.025,
+    minRadius   : 0.01,
+    objVelocity : 0.003,
+    hslLightness: 0.6,
+    lightness   : 0.8,
+    noise       : 0.0015,
+    subTreeCount: 4,
+    subTreeRollX: Math.PI * 0.2
+}
+
+export const treeObjectParams = {
+    fadeInTime : 1000.0,
+    fadeOutTime: 1000.0
+}

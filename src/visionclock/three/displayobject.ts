@@ -21,7 +21,6 @@ export const updateByAnimation = (
 ) => (animation: Animation.IAnimationState) => {
     switch (obj.state) {
         case 'init':
-            sceneState.objects.add(obj)
             parent.add(obj.rootElement)
             obj.state = initialState
             updateByAnimation(obj, sceneState, parent, initialState, store, behaviour)(animation)

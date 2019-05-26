@@ -51,7 +51,8 @@ const updateByAnimation = (
     switch (obj.state) {
         case 'fade-in':
             {
-                const time = DisplayObject.getTime(obj, animation)
+                const time      = DisplayObject.getTime(obj, animation)
+                const timeRatio = time / C.movingObjectParams.fadeInTime
 
                 obj.rootElement.position.add(velocity(obj, animation))
                 if (!isAlive(obj, animation)) {
@@ -62,7 +63,7 @@ const updateByAnimation = (
                 const s = scale(obj, animation)
                 obj.rootElement.scale.set(s, s, s)
 
-                const c = color(obj, animation).clone().multiplyScalar(time / C.movingObjectParams.fadeInTime)
+                const c = color(obj, animation).clone().multiplyScalar(timeRatio)
                 const a = alpha(obj, animation)
                 sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
 
@@ -93,7 +94,8 @@ const updateByAnimation = (
                     store.beginTime = DisplayObject.getTime(obj, animation)
                 }
 
-                const time = DisplayObject.getTime(obj, animation) - store.beginTime
+                const time      = DisplayObject.getTime(obj, animation) - store.beginTime
+                const timeRatio = 1.0 - time / C.movingObjectParams.fadeOutTime
 
                 obj.rootElement.position.add(velocity(obj, animation))
                 if (!isAlive(obj, animation)) {
@@ -104,7 +106,7 @@ const updateByAnimation = (
                 const s = scale(obj, animation)
                 obj.rootElement.scale.set(s, s, s)
 
-                const c = color(obj, animation).clone().multiplyScalar(1.0 - time / C.movingObjectParams.fadeOutTime)
+                const c = color(obj, animation).clone().multiplyScalar(timeRatio)
                 const a = alpha(obj, animation)
                 sobj.setUniform('u_color', [ c.r, c.g, c.b, a ])
 

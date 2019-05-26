@@ -9,13 +9,14 @@ import * as SceneState            from '../scenestate'
 import * as Behaviour             from '../behaviour'
 import * as DisplayObject         from '../displayobject'
 import * as MovingCircleGenerator from './movingcirclegenerator'
+import * as ForestGenerator       from './forestgenerator'
 import * as SnowGenerator         from './snowgenerator'
 import * as C                     from '../../utils/constants'
 import * as Random                from '../../utils/random'
 
 export const create = (
     animations  : Rx.Observable<Animation.IAnimationState>,
-    interactions: Rx.Observable<Interaction.IInteraction[]>,
+    interactions: Rx.Observable<Interaction.IInteraction>,
     times       : Rx.Observable<Date>,
     random      : Random.IRandom,
     aspectObj   : RendererState.IAspect
@@ -33,21 +34,27 @@ export const create = (
     const sceneState: SceneState.ISceneState = {
         scene,
         camera,
-        objects: new Set(),
+        behaviours: new Set(),
+        objects   : new Set(),
         render(renderer) {
             render(this, renderer)
         },
         dispose() {
-            if (generator) {
-                generator.dispose()
-            }
-            subscription.unsubscribe()
-            dispose(this)
+            R.forEach((s: Rx.Subscription) => s.unsubscribe())(subscriptions)
+            SceneState.dispose(this)
         }
     }
 
     const createFuncs = [
         () => MovingCircleGenerator.create(
+            Date.now(),
+            animations,
+            random,
+            sceneState,
+            scene,
+            aspectObj
+        ),
+        () => ForestGenerator.create(
             Date.now(),
             animations,
             random,
@@ -65,24 +72,28 @@ export const create = (
         )
     ]
 
-    let generator: Behaviour.IBehaviour
     let generatorIndex = -1
 
-    const subscription =
+    const observer = () => {
+        R.forEach((obj: Behaviour    .IBehaviour    ) => obj.state = 'terminate')(Array.from(sceneState.behaviours))
+        R.forEach((obj: DisplayObject.IDisplayObject) => obj.state = 'fade-out' )(Array.from(sceneState.objects))
+
+        generatorIndex = (generatorIndex + 1) % createFuncs.length
+        createFuncs[generatorIndex]()
+    }
+
+    const subscriptions = [
         Rx.pipe(
             RxOp.map((d: Date) => d.getMinutes()),
             RxOp.distinctUntilChanged()
-        )(times).subscribe(
-            () => {
-                R.forEach((obj: DisplayObject.IDisplayObject) => obj.state = 'fade-out')(Array.from(sceneState.objects))
-                if (generator) {
-                    generator.dispose()
-                }
+        )(times).subscribe(observer),
 
-                generatorIndex = (generatorIndex + 1) % createFuncs.length
-                generator      = createFuncs[generatorIndex]()
-            }
-        )
+        Rx.pipe(
+            RxOp.map((i: Interaction.IInteraction) => i.button1),
+            RxOp.distinctUntilChanged(),
+            RxOp.filter(b => b)
+        )(interactions).subscribe(observer)
+    ]
 
     return sceneState
 }
@@ -93,8 +104,4 @@ const render = (
 ) => {
     renderer.clearDepth()
     renderer.render(sceneState.scene, sceneState.camera)
-}
-
-const dispose = (sceneState: SceneState.ISceneState) => {
-    R.forEach((obj: DisplayObject.IDisplayObject) => obj.dispose())(Array.from(sceneState.objects))
 }

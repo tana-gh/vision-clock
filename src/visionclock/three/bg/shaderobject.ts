@@ -49,6 +49,7 @@ export const create = (
             }
         }
     }
+    sceneState.objects.add(obj)
 
     const store = {}
 

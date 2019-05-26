@@ -11,7 +11,7 @@ import * as C              from '../../utils/constants'
 export const create = (
     timestamp   : number,
     animations  : Rx.Observable<Animation.IAnimationState>,
-    interactions: Rx.Observable<Interaction.IInteraction[]>,
+    interactions: Rx.Observable<Interaction.IInteraction>,
     times       : Rx.Observable<Date>,
     sceneState  : SceneState.ISceneState,
     parent      : THREE.Object3D,
@@ -67,6 +67,7 @@ export const create = (
             ])()
         }
     }
+    sceneState.objects.add(obj)
 
     const store = {}
 
@@ -166,18 +167,18 @@ const updateByAnimation = (obj: DisplayObject.IDisplayObject, animation: Animati
     }
 }
 
-const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interactions: Interaction.IInteraction[]) => {
+const updateByInteraction = (obj: DisplayObject.IDisplayObject) => (interaction: Interaction.IInteraction) => {
     switch (obj.state) {
         case 'init':
             return
         case 'main':
-            R.forEach((i: Interaction.IInteraction) => {
-                const axis = i.position
+            {
+                const axis = interaction.position
                     .clone()
                     .cross(new THREE.Vector3(0.0, 0.0, -1.0))
                     .normalize()
-                obj.rootElement.setRotationFromAxisAngle(axis, i.position.length() * C.clockRotationAngle)
-            })(interactions)
+                obj.rootElement.setRotationFromAxisAngle(axis, interaction.position.length() * C.clockRotationAngle)
+            }
             return
         case 'terminate':
             return
