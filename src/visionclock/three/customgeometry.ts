@@ -55,7 +55,7 @@ export const createAttributes = (
 ) => {
     return R.pipe(
         R.mapObjIndexed((attr, name) => <[number[], number]>[attr, attributeDims[name]]),
-        R.mapObjIndexed(z => createOneAttribute(z[0], z[1], indices))
+        R.mapObjIndexed((z: [number[], number]) => createOneAttribute(z[0], z[1], indices))
     )(attributes)
 }
 

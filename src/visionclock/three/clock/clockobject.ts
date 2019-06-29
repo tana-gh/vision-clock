@@ -123,8 +123,8 @@ const createAllScales = (
     scales[ 0][0].translateX( gap)
     scales[12][0].translateX(-gap)
     return [
-        new THREE.Object3D().add(...R.map(s => s[0])(scales)),
-        () => R.forEach(s => s[1]())(scales)
+        new THREE.Object3D().add(...R.map((s: [THREE.Object3D, () => void]) => s[0])(scales)),
+        () => R.forEach((s: [THREE.Object3D, () => void]) => s[1]())(scales)
     ]
 }
 
