@@ -45,14 +45,14 @@ module.exports = env => {
                 {
                     test: /\.css$/,
                     loaders: [
-                        'style-loader?sourceMap',
+                        'style-loader',
                         'css-loader?sourceMap'
                     ]
                 },
                 {
                     test: /\.styl(us)?$/,
                     loaders: [
-                        'style-loader?sourceMap',
+                        'style-loader',
                         'css-loader?sourceMap',
                         'stylus-loader?sourceMap'
                     ]

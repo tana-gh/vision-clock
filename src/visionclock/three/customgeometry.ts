@@ -28,7 +28,7 @@ const createVertices = (vertices: number[], indices: number[]) => {
 
     return R.pipe(
         R.map((i: number) => vss[i]),
-        vss => R.flatten<number>(vss),
+        vss => R.flatten<number[][]>(vss),
         vs  => new THREE.Float32BufferAttribute(vs, 3)
     )(indices)
 }
@@ -43,7 +43,7 @@ const createNormals = (vertices: number[], indices: number[]) => {
         R.map((vs: THREE.Vector3[]) => vs[1].sub(vs[0]).cross(vs[2].sub(vs[0])).normalize()),
         R.map(n => [n.x, n.y, n.z]),
         R.chain(n => [n, n, n]),
-        nss => R.flatten<number>(nss),
+        nss => R.flatten<number[][]>(nss),
         ns  => new THREE.Float32BufferAttribute(ns, 3)
     )(indices)
 }
@@ -64,7 +64,7 @@ const createOneAttribute = (values: number[], dim: number, indices: number[]) =>
 
     return R.pipe(
         R.map((i: number) => vss[i]),
-        vss => R.flatten<number>(vss),
+        vss => R.flatten<number[][]>(vss),
         vs  => new THREE.Float32BufferAttribute(vs, dim)
     )(indices)
 }
