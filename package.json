@@ -3,21 +3,16 @@
   "version": "1.0.0",
   "description": "Vision Clock",
   "main": "dist/production/vision-clock.js",
+  "author": "tana-gh <yozoranotakaku@gmail.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/tana-gh/vision-clock.git"
   },
-  "author": "tana",
   "license": "MIT",
-  "browserslist": [
-    "> 0.5%",
-    "last 2 version",
-    "not dead"
-  ],
   "scripts": {
-    "dev": "webpack-dev-server --env.dev",
-    "build": "webpack --env.dev",
-    "release": "webpack --env.prod"
+    "test": "jest",
+    "dev": "webpack serve --config ./build/webpack.dev.config.js",
+    "build": "rm -rf dist/* && webpack --config ./build/webpack.prod.config.js && yarn licenses list > THIRD_PARTY && cp THIRD_PARTY dist"
   },
   "dependencies": {
     "@babel/runtime": "^7.9.2",

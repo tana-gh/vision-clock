@@ -1,0 +1,34 @@
+@import "../font/font.scss";
+
+html {
+    width : 100vw;
+    height: 100vh;
+}
+
+body {
+    width : 100%;
+    height: 100%;
+    margin: 0;
+    
+    display        : flex;
+    justify-content: center;
+    align-items    : center;
+}
+
+#app {
+    width : 100%;
+    height: 100%;
+    
+    .three {
+        width : 100%;
+        height: 100%;
+    }
+
+    .fps {
+        position  : fixed;
+        right     : 10px;
+        bottom    : 10px;
+        color     : white;
+        font-size : 12pt;
+    }
+}
