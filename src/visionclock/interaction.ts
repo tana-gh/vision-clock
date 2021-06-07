@@ -15,7 +15,7 @@ export const create = (
     animations   : Rx.Observable<Animation.IAnimationState>,
     targetElement: HTMLElement | Window,
     rootElement  : HTMLElement | Window
-) => {
+): Rx.Observable<IInteraction> => {
     const mouseEvents = Rx.merge(
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mousedown', { capture: true }),
         <Rx.Observable<MouseEvent>>Rx.fromEvent(rootElement, 'mousemove', { capture: true }),
@@ -53,13 +53,15 @@ const getInteractionFromMouseEvent = (targetElement: HTMLElement | Window) => (e
 
 const getInteractionFromTouchEvent = (targetElement: HTMLElement | Window) => ([prev, curr]: [TouchEvent | undefined, TouchEvent | undefined]) => {
     const [moveX, moveY] = prev !== undefined &&
-                           curr!.touches[0] !== undefined &&
-                           prev .touches[0] !== undefined &&
-                           curr!.touches[0].identifier === prev.touches[0].identifier ?
-                           [curr!.touches[0].clientX - prev.touches[0].clientX, curr!.touches[0].clientY - prev.touches[0].clientY] :
+                           curr !== undefined &&
+                           curr.touches[0] !== undefined &&
+                           prev.touches[0] !== undefined &&
+                           curr.touches[0].identifier === prev.touches[0].identifier ?
+                           [curr.touches[0].clientX - prev.touches[0].clientX, curr.touches[0].clientY - prev.touches[0].clientY] :
                            [0.0, 0.0]
-    const [position, movement] = curr!.touches[0] !== undefined ?
-                                 getPosition(targetElement, curr!.touches[0].clientX, curr!.touches[0].clientY, moveX, moveY) :
+    const [position, movement] = curr !== undefined &&
+                                 curr.touches[0] !== undefined ?
+                                 getPosition(targetElement, curr.touches[0].clientX, curr.touches[0].clientY, moveX, moveY) :
                                  prev !== undefined && prev.touches[0] !== undefined ?
                                  getPosition(targetElement, prev .touches[0].clientX, prev .touches[0].clientY, moveX, moveY) :
                                  [undefined, undefined]
@@ -71,7 +73,7 @@ const getInteractionFromTouchEvent = (targetElement: HTMLElement | Window) => ([
     return <IInteraction>{
         position,
         movement,
-        button1: curr!.touches[0] !== undefined,
+        button1: curr?.touches[0] !== undefined,
         button2: false,
         button3: false
     }

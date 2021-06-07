@@ -17,7 +17,7 @@ export const create = (
     scale     : number,
     color     : THREE.Color,
     lightness : number
-) => {
+): ShaderObject.IShaderObject => {
     return ShaderObject.create(
         timestamp,
         animations,

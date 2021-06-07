@@ -193,11 +193,13 @@ const updateByTime = (obj: DisplayObject.IDisplayObject) => (time: Date) => {
         case 'init':
             return
         case 'main':
-            const [h, m, s] = [time.getHours(), time.getMinutes(), time.getSeconds()]
-            updateHandByTime(obj.elements.hourHand  , (h % 12 * 60 * 60 + m * 60 + s) / (12 * 60 * 60))
-            updateHandByTime(obj.elements.minuteHand, (m * 60 + s) / (60 * 60))
-            updateHandByTime(obj.elements.secondHand, s / 60)
-            return
+            {
+                const [h, m, s] = [time.getHours(), time.getMinutes(), time.getSeconds()]
+                updateHandByTime(obj.elements.hourHand  , (h % 12 * 60 * 60 + m * 60 + s) / (12 * 60 * 60))
+                updateHandByTime(obj.elements.minuteHand, (m * 60 + s) / (60 * 60))
+                updateHandByTime(obj.elements.secondHand, s / 60)
+                return
+            }
         case 'terminate':
             return
         default:

@@ -23,7 +23,7 @@ export const create = (
     attributes       : { [name: string]: number[] },
     attributeDims    : { [name: string]: number   },
     material         : THREE.Material
-) => {
+): IShaderObject => {
     const vertices = C.shaderObjectVertices
     const indices  = C.shaderObjectIndices
     const geometry  = CustomGeometry.create(vertices, indices, attributes, attributeDims)

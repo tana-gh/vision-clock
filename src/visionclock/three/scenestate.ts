@@ -13,7 +13,7 @@ export interface ISceneState {
     dispose   : () => void
 }
 
-export const setCameraSize = (camera: THREE.Camera, aspect: number) => {
+export const setCameraSize = (camera: THREE.Camera, aspect: number): void => {
     if (camera instanceof THREE.OrthographicCamera) {
         camera.left   = -aspect * 0.5
         camera.right  =  aspect * 0.5
@@ -29,7 +29,7 @@ export const setCameraSize = (camera: THREE.Camera, aspect: number) => {
     }
 }
 
-export const dispose = (sceneState: ISceneState) => {
+export const dispose = (sceneState: ISceneState): void => {
     R.forEach((obj: Behaviour    .IBehaviour    ) => obj.dispose())(Array.from(sceneState.behaviours))
     R.forEach((obj: DisplayObject.IDisplayObject) => obj.dispose())(Array.from(sceneState.objects))
 }

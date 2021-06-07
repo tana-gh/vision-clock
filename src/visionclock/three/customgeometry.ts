@@ -6,14 +6,14 @@ export const create = (
     indices       : number[],
     attributes   ?: { [name: string]: number[] },
     attributeDims?: { [name: string]: number   }
-) => {
+): THREE.BufferGeometry => {
     const geometry = new THREE.BufferGeometry()
     
     const vs = createVertices(vertices, indices)
-    geometry.addAttribute('position', vs)
+    geometry.setAttribute('position', vs)
 
     const ns = createNormals(vertices, indices)
-    geometry.addAttribute('normal'  , ns)
+    geometry.setAttribute('normal'  , ns)
 
     if (attributes && attributeDims) {
         const attrs = createAttributes(attributes, attributeDims, indices)
@@ -52,7 +52,7 @@ export const createAttributes = (
     attributes   : { [name: string]: number[] },
     attributeDims: { [name: string]: number   },
     indices      : number[]
-) => {
+): Record<string, THREE.BufferAttribute> => {
     return R.pipe(
         R.mapObjIndexed((attr, name) => <[number[], number]>[attr, attributeDims[name]]),
         R.mapObjIndexed((z: [number[], number]) => createOneAttribute(z[0], z[1], indices))

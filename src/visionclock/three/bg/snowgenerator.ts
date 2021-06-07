@@ -19,7 +19,7 @@ export const create = (
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     aspectObj : RendererState.IAspect
-) => {
+): Behaviour.IBehaviour => {
     const generator: Behaviour.IBehaviour = {
         timestamp,
         state: 'init',

@@ -20,7 +20,7 @@ export const create = (
     times       : Rx.Observable<Date>,
     random      : Random.IRandom,
     aspectObj   : RendererState.IAspect
-) => {
+): SceneState.ISceneState => {
     const scene  = new THREE.Scene()
     const camera = new THREE.OrthographicCamera(
         -aspectObj.value * 0.5,

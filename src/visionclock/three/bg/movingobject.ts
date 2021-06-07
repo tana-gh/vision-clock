@@ -18,7 +18,7 @@ export const create = (
     color     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
     alpha     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number,
     isAlive   : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => boolean
-) => {
+): ShaderObject.IShaderObject => {
     return ShaderObject.create(
         timestamp,
         animations,

@@ -47,7 +47,7 @@ export const create = (
     }
 }
 
-export const setScenes = (renderer: IRendererState, ...scenes: SceneState.ISceneState[]) => {
+export const setScenes = (renderer: IRendererState, ...scenes: SceneState.ISceneState[]): void => {
     R.forEach((s: SceneState.ISceneState) => renderer.scenes.add(s))(scenes)
 }
 

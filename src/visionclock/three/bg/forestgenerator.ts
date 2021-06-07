@@ -20,7 +20,7 @@ export const create = (
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     aspectObj : RendererState.IAspect
-) => {
+): Behaviour.IBehaviour => {
     const generator: Behaviour.IBehaviour = {
         timestamp,
         state: 'init',
@@ -76,33 +76,35 @@ const updateByAnimation = (
 ) => (obj: Behaviour.IBehaviour, animation: Animation.IAnimationState, store: any) => {
     switch (obj.state) {
         case 'main':
-            if (store.beginTime === undefined) {
-                store.beginTime = Number.NEGATIVE_INFINITY
+            {
+                if (store.beginTime === undefined) {
+                    store.beginTime = Number.NEGATIVE_INFINITY
+                }
+
+                const time = Behaviour.getTime(obj, animation)
+
+                if (time > store.beginTime + C.forestGeneratorParams.interval) {
+                    R.forEach((o: DisplayObject.IDisplayObject) => o.state = 'fade-out')(Array.from(sceneState.objects))
+
+                    TreeGenerator.create(
+                        Date.now(),
+                        animations,
+                        random,
+                        sceneState,
+                        parent,
+                        material.clone(),
+                        new THREE.Vector3((random.next() - 0.5) * aspectObj.value, -0.5,  0.0),
+                        new THREE.Vector3(0.0,  1.0,  0.0).multiplyScalar(C.forestGeneratorParams.velocity),
+                        new THREE.Vector3(1.0,  0.0,  0.0),
+                        new THREE.Vector3(0.0,  0.0, -1.0),
+                        C.forestGeneratorParams.objCount,
+                        C.forestGeneratorParams.depth
+                    )
+
+                    store.beginTime = time
+                }
+                return
             }
-
-            const time = Behaviour.getTime(obj, animation)
-
-            if (time > store.beginTime + C.forestGeneratorParams.interval) {
-                R.forEach((o: DisplayObject.IDisplayObject) => o.state = 'fade-out')(Array.from(sceneState.objects))
-
-                TreeGenerator.create(
-                    Date.now(),
-                    animations,
-                    random,
-                    sceneState,
-                    parent,
-                    material.clone(),
-                    new THREE.Vector3((random.next() - 0.5) * aspectObj.value, -0.5,  0.0),
-                    new THREE.Vector3(0.0,  1.0,  0.0).multiplyScalar(C.forestGeneratorParams.velocity),
-                    new THREE.Vector3(1.0,  0.0,  0.0),
-                    new THREE.Vector3(0.0,  0.0, -1.0),
-                    C.forestGeneratorParams.objCount,
-                    C.forestGeneratorParams.depth
-                )
-
-                store.beginTime = time
-            }
-            return
         default:
             throw 'Invalid state'
     }

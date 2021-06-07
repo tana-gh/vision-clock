@@ -19,7 +19,7 @@ export const create = (
     sceneState: SceneState.ISceneState,
     parent    : THREE.Object3D,
     aspectObj : RendererState.IAspect
-) => {
+): Behaviour.IBehaviour => {
     const generator: Behaviour.IBehaviour = {
         timestamp,
         state: 'init',
@@ -105,7 +105,7 @@ const updateByAnimation = (
                         (C.movingCircleGeneratorParams.maxRadius  -
                          C.movingCircleGeneratorParams.minRadius) +
                          C.movingCircleGeneratorParams.minRadius),
-                (color => (o, a) => {
+                (color => (o: DisplayObject.IDisplayObject, a: Animation.IAnimationState) => {
                     const time = DisplayObject.getTime(o, a) * 0.001
                     const c    = color.clone()
                     const hsl  = c.getHSL({ h: 0.0, s: 0.0, l: 0.0 })

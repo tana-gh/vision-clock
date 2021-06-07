@@ -9,13 +9,8 @@ export interface IAnimationState {
     progress: number
 }
 
-export const create = (now: number) => {
-    const animations = Rx.merge(
-        Rx.of(0),
-        RxOp.repeat()(
-            Rx.of(0, Rx.animationFrameScheduler)
-        )
-    )
+export const create = (now: number): Rx.Observable<IAnimationState> => {
+    const animations = Rx.interval(0, Rx.animationFrameScheduler)
     const start = now
 
     return Rx.pipe(

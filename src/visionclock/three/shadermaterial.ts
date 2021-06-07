@@ -5,7 +5,7 @@ export const create = (
     vertexShader  : string,
     fragmentShader: string,
     uniforms?     : { [name: string]: number | number[] }
-) => {
+): THREE.ShaderMaterial => {
     const material = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
@@ -20,6 +20,6 @@ export const create = (
     return material
 }
 
-export const createUniforms = (uniforms: { [name: string]: number | number[] }) => {
+export const createUniforms = (uniforms: { [name: string]: number | number[] }): Record<string, THREE.Uniform> => {
     return R.mapObjIndexed(value => new THREE.Uniform(value))(uniforms)
 }

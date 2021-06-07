@@ -13,7 +13,7 @@ export const updateByAnimation = (
     initialState: string,
     store       : any,
     behaviour   : (obj: IBehaviour, animation: Animation.IAnimationState, store: any) => void
-) => (animation: Animation.IAnimationState) => {
+) => (animation: Animation.IAnimationState): void => {
     switch (obj.state) {
         case 'init':
             obj.state = initialState
@@ -28,6 +28,6 @@ export const updateByAnimation = (
     }
 }
 
-export const getTime = (obj: IBehaviour, animation: Animation.IAnimationState) => {
+export const getTime = (obj: IBehaviour, animation: Animation.IAnimationState): number => {
     return animation.now - obj.timestamp
 }

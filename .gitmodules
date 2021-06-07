@@ -1,6 +1,3 @@
-[submodule "dist"]
-	path = dist
-	url = git@github.com:tana-gh/vision-clock-page.git
 [submodule "config"]
 	path = config
 	url = git@github.com:tana-gh/node-config-template.git

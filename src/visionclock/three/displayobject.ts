@@ -18,7 +18,7 @@ export const updateByAnimation = (
     initialState: string,
     store       : any,
     behaviour   : (obj: IDisplayObject, animation: Animation.IAnimationState, store: any) => void
-) => (animation: Animation.IAnimationState) => {
+) => (animation: Animation.IAnimationState): void => {
     switch (obj.state) {
         case 'init':
             parent.add(obj.rootElement)
@@ -35,5 +35,5 @@ export const updateByAnimation = (
     }
 }
 
-export const getTime = (obj: IDisplayObject, animation: Animation.IAnimationState) =>
+export const getTime = (obj: IDisplayObject, animation: Animation.IAnimationState): number =>
     Behaviour.getTime(obj, animation)

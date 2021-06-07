@@ -84,7 +84,7 @@ export const mapVertices = (
     height: number,
     z     : number,
     back  : number
-) => (placeholder: string) => {
+) => (placeholder: string): number => {
     switch (placeholder) {
         case '0':
             return 0.0

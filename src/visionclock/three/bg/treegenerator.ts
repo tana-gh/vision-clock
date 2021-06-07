@@ -22,7 +22,7 @@ export const create = (
     rotation  : THREE.Vector3,
     objCount  : number,
     depth     : number
-) => {
+): Behaviour.IBehaviour => {
     const generator: Behaviour.IBehaviour = {
         timestamp,
         state: 'init',

@@ -16,7 +16,7 @@ export const create = (
     aspectObj : RendererState.IAspect,
     color     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => THREE.Color,
     alpha     : (obj: DisplayObject.IDisplayObject, animation: Animation.IAnimationState) => number,
-) => {
+): ShaderObject.IShaderObject => {
     return ShaderObject.create(
         timestamp,
         animations,
