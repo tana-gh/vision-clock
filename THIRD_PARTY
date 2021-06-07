@@ -1,3 +1,4 @@
+yarn licenses v1.22.10
 info fsevents@2.3.2: The platform "linux" is incompatible with this module.
 info "fsevents@2.3.2" is an optional dependency and failed compatibility check. Excluding it from installation.
 info fsevents@1.2.13: The platform "linux" is incompatible with this module.
@@ -819,6 +820,9 @@ info "fsevents@1.2.13" is an optional dependency and failed compatibility check.
 │  │  └─ URL: https://github.com/babel/babel.git
 │  ├─ @babel/plugin-syntax-json-strings@7.8.3
 │  │  └─ URL: https://github.com/babel/babel/tree/master/packages/babel-plugin-syntax-json-strings
+│  ├─ @babel/plugin-syntax-jsx@7.12.13
+│  │  ├─ URL: https://github.com/babel/babel.git
+│  │  └─ VendorUrl: https://babel.dev/docs/en/next/babel-plugin-syntax-jsx
 │  ├─ @babel/plugin-syntax-logical-assignment-operators@7.10.4
 │  │  └─ URL: https://github.com/babel/babel.git
 │  ├─ @babel/plugin-syntax-nullish-coalescing-operator@7.8.3
@@ -3783,3 +3787,4 @@ info "fsevents@1.2.13" is an optional dependency and failed compatibility check.
       ├─ URL: https://github.com/dchest/tweetnacl-js.git
       ├─ VendorName: TweetNaCl-js contributors
       └─ VendorUrl: https://tweetnacl.js.org/
+Done in 0.91s.
